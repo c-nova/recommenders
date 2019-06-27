@@ -10,6 +10,17 @@ import tensorflow as tf
 MODEL_DIR = "model_checkpoints"
 
 
+OPTIMIZERS = dict(
+    adadelta=tf.train.AdadeltaOptimizer,
+    adagrad=tf.train.AdagradOptimizer,
+    adam=tf.train.AdamOptimizer,
+    ftrl=tf.train.FtrlOptimizer,
+    momentum=tf.train.MomentumOptimizer,
+    rmsprop=tf.train.RMSPropOptimizer,
+    sgd=tf.train.GradientDescentOptimizer,
+)
+
+
 def pandas_input_fn(
     df, y_col=None, batch_size=128, num_epochs=1, shuffle=False, seed=None
 ):
@@ -83,28 +94,23 @@ def build_optimizer(name, lr=0.001, **kwargs):
     Returns:
         tf.train.Optimizer
     """
-    optimizers = dict(
-        adadelta=tf.train.AdadeltaOptimizer,
-        adagrad=tf.train.AdagradOptimizer,
-        adam=tf.train.AdamOptimizer,
-        ftrl=tf.train.FtrlOptimizer,
-        momentum=tf.train.MomentumOptimizer,
-        rmsprop=tf.train.RMSPropOptimizer,
-        sgd=tf.train.GradientDescentOptimizer,
-    )
+    name = name.lower()
 
     try:
-        optimizer_class = optimizers[name.lower()]
+        optimizer_class = OPTIMIZERS[name]
     except KeyError:
         raise KeyError(
-            "Optimizer name should be one of: [{}]".format(", ".join(optimizers.keys()))
+            "Optimizer name should be one of: {}".format(list(OPTIMIZERS))
         )
 
-    # assign default values
-    if name.lower() == "momentum" and "momentum" not in kwargs:
-        kwargs["momentum"] = 0.9
+    # Set parameters
+    params = {}
+    if name == 'ftrl':
+        params['l1_regularization_strength'] = kwargs.get('l1_regularization_strength', 0.0)
+    elif name == 'momentum' or name == 'rmsprop':
+        params['momentum'] = kwargs.get('momentum', 0.0)
 
-    return optimizer_class(learning_rate=lr, **kwargs)
+    return optimizer_class(learning_rate=lr, **params)
 
 
 def evaluation_log_hook(
