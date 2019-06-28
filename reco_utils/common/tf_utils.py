@@ -107,6 +107,7 @@ def build_optimizer(name, lr=0.001, **kwargs):
     params = {}
     if name == 'ftrl':
         params['l1_regularization_strength'] = kwargs.get('l1_regularization_strength', 0.0)
+        params['l2_regularization_strength'] = kwargs.get('l2_regularization_strength', 0.0)
     elif name == 'momentum' or name == 'rmsprop':
         params['momentum'] = kwargs.get('momentum', 0.0)
 
@@ -125,26 +126,26 @@ def evaluation_log_hook(
     eval_fns=None,
     **eval_kwargs
 ):
-    """Evaluation log hook for TensorFlow high-levmodel_direl API Estimator.
-    Note, to evaluate the model in the middle of training (by using this hook),
-    the model checkpointing steps should be equal or larger than the hook's since
-    TensorFlow Estimator uses the last checkpoint for evaluation or prediction.
-    Checkpoint frequency can be set via Estimator's run config.
+    """Evaluation log hook for TensorFlow high-level API Estimator.
+    Note, TensorFlow Estimator model uses the last checkpoint weights for evaluation or prediction.
+    In order to get the most up-to-date evaluation results while training,
+    set model's `save_checkpoints_steps` to be equal or greater than hook's `every_n_iter`.
 
     Args:
         estimator (tf.estimator.Estimator): Model to evaluate.
-        logger (Logger): Custom logger to log the results. E.g., define a subclass of Logger for AzureML logging.
+        logger (Logger): Custom logger to log the results.
+            E.g., define a subclass of Logger for AzureML logging.
         true_df (pd.DataFrame): Ground-truth data.
         y_col (str): Label column name in true_df
-        eval_df (pd.DataFrame): Evaluation data. May not include the label column as
-            some evaluation functions do not allow.
-        every_n_iter (int): Evaluation frequency (steps). Should be equal or larger than checkpointing steps.
+        eval_df (pd.DataFrame): Evaluation data without label column.
+        every_n_iter (int): Evaluation frequency (steps).
         model_dir (str): Model directory to save the summaries to. If None, does not record.
         batch_size (int): Number of samples fed into the model at a time.
             Note, the batch size doesn't affect on evaluation results.
         eval_fns (iterable of functions): List of evaluation functions that have signature of
             (true_df, prediction_df, **eval_kwargs)->(float). If None, loss is calculated on true_df.
-        **eval_kwargs: Evaluation function's keyword arguments. Note, prediction column name should be 'prediction'
+        **eval_kwargs: Evaluation function's keyword arguments.
+            Note, prediction column name should be 'prediction'
 
     Returns:
         tf.train.SessionRunHook: Session run hook to evaluate the model while training.

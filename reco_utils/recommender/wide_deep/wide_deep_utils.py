@@ -143,8 +143,8 @@ def build_model(
         dnn_hidden_units (list of int): Deep model hidden units. E.g., [10, 10, 10] is three layers of 10 nodes each.
         dnn_dropout (float): Deep model's dropout rate.
         dnn_batch_norm (bool): Deep model's batch normalization flag.
-        log_every_n_iter (int): Every log_every_n_iter steps, log the train loss.
-        save_checkpoints_steps (int): Model checkpointing frequency.
+        log_every_n_iter (int): Log the training loss for every n steps.
+        save_checkpoints_steps (int): Model checkpoint frequency.
         seed (int): Random seed.
 
     Returns:
