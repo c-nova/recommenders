@@ -21,6 +21,41 @@ OPTIMIZERS = dict(
 )
 
 
+def pandas_input_fn_for_saved_model(
+    df,
+    feat_name_type,
+):
+    """Pandas input function for TensorFlow SavedModel.
+    
+    Args:
+        df (pd.DataFrame): Data containing features.
+        feat_name_type (dict): Feature name and type spec. E.g.
+            `{'userID': int, 'itemID': int, 'rating': float}`
+        
+    Returns:
+        func: Input function 
+    
+    """
+    for feat_type in feat_name_type.values():
+        assert feat_type in (int, float, list)
+        
+    def input_fn():
+        examples = [None] * len(df)
+        for i, sample in df.iterrows():
+            ex = tf.train.Example()
+            for feat_name, feat_type in feat_name_type.items():
+                feat = ex.features.feature[feat_name]
+                if feat_type == int:
+                    feat.int64_list.value.extend([sample[feat_name]])
+                elif feat_type == float:
+                    feat.float_list.value.extend([sample[feat_name]])
+                elif feat_type == list:
+                    feat.float_list.value.extend(sample[feat_name])
+            examples[i] = ex.SerializeToString()
+        return {'inputs': tf.constant(examples)}
+    return input_fn
+
+
 def pandas_input_fn(
     df, y_col=None, batch_size=128, num_epochs=1, shuffle=False, seed=None
 ):
@@ -112,6 +147,42 @@ def build_optimizer(name, lr=0.001, **kwargs):
         params['momentum'] = kwargs.get('momentum', 0.0)
 
     return optimizer_class(learning_rate=lr, **params)
+
+
+def export_model(model, train_input_fn, eval_input_fn, tf_feat_cols, base_dir):
+    """Export TensorFlow estimator (model).
+    
+    Args:
+        model (tf.estimator.Estimator): Model to export.
+        train_input_fn (function): Training input function to create data receiver spec.
+        eval_input_fn (function): Evaluation input function to create data receiver spec. 
+        tf_feat_cols (list(tf.feature_column)): Feature columns.
+        base_dir (str): Base directory to export the model.
+    Returns:
+        str: Exported model path
+    """
+    tf.logging.set_verbosity(tf.logging.ERROR)
+    train_rcvr_fn = tf.contrib.estimator.build_supervised_input_receiver_fn_from_input_fn(
+        train_input_fn
+    )
+    eval_rcvr_fn = tf.contrib.estimator.build_supervised_input_receiver_fn_from_input_fn(
+        eval_input_fn
+    )
+    serve_rcvr_fn = tf.estimator.export.build_parsing_serving_input_receiver_fn(
+        tf.feature_column.make_parse_example_spec(tf_feat_cols)
+    )
+    rcvr_fn_map = {
+        tf.estimator.ModeKeys.TRAIN: train_rcvr_fn,
+        tf.estimator.ModeKeys.EVAL: eval_rcvr_fn,
+        tf.estimator.ModeKeys.PREDICT: serve_rcvr_fn
+    }
+    exported_path = tf.contrib.estimator.export_all_saved_models(
+        model,
+        export_dir_base=base_dir,
+        input_receiver_fn_map=rcvr_fn_map
+    )
+    
+    return exported_path.decode("utf-8")
 
 
 def evaluation_log_hook(
