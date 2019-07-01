@@ -86,7 +86,7 @@ parser.add_argument('--dnn-item-embedding-dim', type=int, dest='DNN_ITEM_DIM', d
 parser.add_argument('--dnn-batch-norm', type=int, dest='DNN_BATCH_NORM', default=1)
 parser.add_argument('--dnn-dropout', type=float, dest='DNN_DROPOUT', default=0.0)
 # Training parameters
-parser.add_argument('--steps', type=int, dest='STEPS', default=50)
+parser.add_argument('--steps', type=int, dest='STEPS', default=10000)
 parser.add_argument('--batch-size', type=int, dest='BATCH_SIZE', default=128)
 parser.add_argument('--evaluate-while-training', dest='EVALUATE_WHILE_TRAINING', action='store_true')
 

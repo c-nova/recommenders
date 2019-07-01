@@ -1,8 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+import itertools
+import os
 import pytest
-import shutil
 
 import numpy as np
 import pandas as pd
@@ -187,44 +188,31 @@ def test_pandas_input_fn_for_saved_model(pd_df, tmp):
     )
     model.train(input_fn=train_fn, steps=1)
     
-    # Export the model
+    # Test export_model function
     exported_path = export_model(
         model=model,
         train_input_fn=train_fn,
         eval_input_fn=pandas_input_fn(
             df=data, y_col=DEFAULT_RATING_COL
-        )
+        ),
         tf_feat_cols=deep_columns,
         base_dir=export_dir
     )
-    
-    pandas_input_fn_for_saved_model(    df,
-    feat_name_type
-    )
-    
-    # TODO...
-    model_file_dir = best_run_metrics['saved_model_dir'][4:-1] + '/'
-print(model_file_dir)
+    saved_model = tf.contrib.estimator.SavedModelEstimator(exported_path)
 
-for f in best_run.get_file_names():
-    if f.startswith(model_file_dir):
-        output_file_path = os.path.join(MODEL_DIR, f.split(model_file_dir)[1])
-        print("Downloading {}..".format(f))
-        best_run.download_file(name=f, output_file_path=output_file_path)
-    
-saved_model = tf.contrib.estimator.SavedModelEstimator(MODEL_DIR)
-
-
-predictions = list(itertools.islice(
-    saved_model.predict(
-        pandas_input_fn_for_saved_model(
-            df=X_test,
-            feat_name_type={
-                USER_COL: int,
-                ITEM_COL: int,
-                ITEM_FEAT_COL: list
-            }
-        )
-    ),
-    len(X_test)
-))
+    # Test pandas_input_fn_for_saved_model with the saved model
+    test = data.drop(DEFAULT_RATING_COL, axis=1)
+    test.reset_index(drop=True, inplace=True)
+    list(itertools.islice(
+        saved_model.predict(
+            pandas_input_fn_for_saved_model(
+                df=test,
+                feat_name_type={
+                    DEFAULT_USER_COL: int,
+                    DEFAULT_ITEM_COL: int,
+                    ITEM_FEAT_COL: list
+                }
+            )
+        ),
+        len(test)
+    ))

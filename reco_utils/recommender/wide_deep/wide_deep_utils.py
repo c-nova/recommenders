@@ -190,11 +190,9 @@ def build_model(
         )
     else:
         raise ValueError(
-            """
-            To generate wide model, set wide_columns.
-            To generate deep model, set deep_columns.
-            To generate wide_deep model, set both wide_columns and deep_columns.
-            """
+            "To generate wide model, set wide_columns.\n"
+            "To generate deep model, set deep_columns.\n"
+            "To generate wide_deep model, set both wide_columns and deep_columns."
         )
 
     return model
