@@ -1,72 +1,85 @@
 # Recommenders
 
-This repository provides examples and best practices for building recommendation systems, provided as Jupyter notebooks. The examples detail our learnings on five key tasks: 
-- [Prepare Data](notebooks/01_prepare_data/README.md): Preparing and loading data for each recommender algorithm
-- [Model](notebooks/02_model/README.md): Building models using various classical and deep learning recommender algorithms such as Alternating Least Squares ([ALS](https://spark.apache.org/docs/latest/api/python/_modules/pyspark/ml/recommendation.html#ALS)) or eXtreme Deep Factorization Machines ([xDeepFM](https://arxiv.org/abs/1803.05170)).
-- [Evaluate](notebooks/03_evaluate/README.md): Evaluating algorithms with offline metrics
-- [Model Select and Optimize](notebooks/04_model_select_and_optimize): Tuning and optimizing hyperparameters for recommender models
-- [Operationalize](notebooks/05_operationalize/README.md): Operationalizing models in a production environment on Azure
+このリポジトリはレコメンデーション システムを構築するにあたってのサンプルコードとベストプラクティスを Jupyter ノートブック形式で提供します。私たちが提供するサンプルコードの詳細は、5 つの主要なタスクで構成されます:
 
-Several utilities are provided in [reco_utils](reco_utils) to support common tasks such as loading datasets in the format expected by different algorithms, evaluating model outputs, and splitting training/test data. Implementations of several state-of-the-art algorithms are provided for self-study and customization in your own applications.
+- [データの準備](notebooks/01_prepare_data/README.md): それぞれのレコメンド アルゴリズムにデータを準備し、読み込みます
+- [モデル](notebooks/02_model/README.md): 古典的またはディープラーニングを使用したレコメンド アルゴリズムを使用してモデルを構築します。アルゴリズムには Alternating Least Squares ([ALS](https://spark.apache.org/docs/latest/api/python/_modules/pyspark/ml/recommendation.html#ALS)) や eXtreme Deep Factorization Machines ([xDeepFM](https://arxiv.org/abs/1803.05170)) などが含まれます
+- [評価](notebooks/03_evaluate/README.md): オフライン メトリクスを使用してアルゴリズムを評価します
+- [モデルの選択と最適化](notebooks/04_model_select_and_optimize): レコメンド モデルのハイパーパラメータのチューニングと最適化を行います
+- [運用化](notebooks/05_operationalize/README.md): Azure 上の本番環境で動作するようモデルの運用化を行います
 
-## Getting Started
-Please see the [setup guide](SETUP.md) for more details on setting up your machine locally, on Spark, or on [Azure Databricks](SETUP.md#setup-guide-for-azure-databricks). 
+異なるアルゴリズムによって期待される形式でデータセットを読み込む、モデル出力の評価、トレーニングとテストデータを分割するような一般的なタスクをサポートするいくつかのユーティリティは、 [reco_utils](reco_utils) で提供されます。いくつかの最新のアルゴリズムの実装は、自習及び独自のアプリケーションとしてカスタマイズできるよう提供しています。
 
-To setup on your local machine:
-1. Install Anaconda with Python >= 3.6. [Miniconda](https://conda.io/miniconda.html) is a quick way to get started.
-2. Clone the repository
-    ```
+## 使用方法
+
+ローカルマシン、Spark上、[Azure Databricks](SETUP.md#setup-guide-for-azure-databricks) での詳細な設定方法については、[セットアップ ガイド(SETUP.md) をご覧ください。
+
+ローカルマシンでセットアップするには:
+
+1. Anaconda を使用して Python 3.6 以上をインストールします。[Miniconda](https://conda.io/miniconda.html) を使用することで簡単にインストールすることが可能です。
+2. リポジトリをクローンします
+
+    ``` bash
     git clone https://github.com/Microsoft/Recommenders
     ```
-3. Run the generate conda file script to create a conda environment:
-   (This is for a basic python environment, see [SETUP.md](SETUP.md) for PySpark and GPU environment setup) 
-    ```
+
+3. generate conda file スクリプトを実行して conda 環境を作成します:
+   (これは基本的な python 環境を作成する場合です。 PySpark または GPU 環境でのセットアップは [SETUP.md](SETUP.md) を参照してください)
+
+    ``` bash
     cd Recommenders
     python scripts/generate_conda_file.py
     conda env create -f reco_base.yaml  
     ```
-4. Activate the conda environment and register it with Jupyter:
-    ```
+
+4. conda 環境をアクティベートし、Jupyter に登録します:
+
+    ``` bash
     conda activate reco_base
     python -m ipykernel install --user --name reco_base --display-name "Python (reco)"
     ```
-5. Start the Jupyter notebook server
-    ```
+
+5. Jupyter notebook server を起動します
+
+    ``` bash
     cd notebooks
     jupyter notebook
     ```
-6. Run the [SAR Python CPU MovieLens](notebooks/00_quick_start/sar_movielens.ipynb) notebook under the 00_quick_start folder. Make sure to change the kernel to "Python (reco)".
 
-**NOTE** - The [Alternating Least Squares (ALS)](notebooks/00_quick_start/als_movielens.ipynb) notebooks require a PySpark environment to run. Please follow the steps in the [setup guide](SETUP.md#dependencies-setup) to run these notebooks in a PySpark environment.
+6. 00_quick_start folder フォルダの中にある [SAR Python CPU MovieLens](notebooks/00_quick_start/sar_movielens.ipynb) ノートブックを実行します。Python のカーネルが "Python (reco)" に変更されていることを確認します。
 
+**注意** - [Alternating Least Squares (ALS)](notebooks/00_quick_start/als_movielens.ipynb) ノートブックを実行するには PySpark 環境が必要です。実行する際には[セットアップ ガイド](SETUP.md#dependencies-setup) の PySpark 環境のステップに従ってください。
 
-## Algorithms
+## アルゴリズム
 
-The table below lists recommender algorithms currently available in the repository. Notebooks are linked under the Environment column when different implementations are available.
+以下の表は、このリポジトリ内で現在利用可能なアルゴリズムの一覧です。異なる実装が利用可能な場合には、「環境」列内のリンクから各ノートブックを開く事が可能です。
 
-| Algorithm | Environment | Type | Description | 
+| アルゴリズム | 環境 | 形式 | 詳細 | 
 | --- | --- | --- | --- |
-| Alternating Least Squares (ALS) | [PySpark](notebooks/00_quick_start/als_movielens.ipynb) | Collaborative Filtering | Matrix factorization algorithm for explicit or implicit feedback in large datasets, optimized by Spark MLLib for scalability and distributed computing capability | 
-| Deep Knowledge-Aware Network (DKN)<sup>*</sup> | [Python CPU / Python GPU](notebooks/00_quick_start/dkn_synthetic.ipynb) | Content-Based Filtering | Deep learning algorithm incorporating a knowledge graph and article embeddings to provide powerful news or article recommendations | 
-| Extreme Deep Factorization Machine (xDeepFM)<sup>*</sup> | [Python CPU / Python GPU](notebooks/00_quick_start/xdeepfm_criteo.ipynb) | Hybrid | Deep learning based algorithm for implicit and explicit feedback with user/item features | 
-| FastAI Embedding Dot Bias (FAST) | [Python CPU / Python GPU](notebooks/00_quick_start/fastai_movielens.ipynb) | Collaborative Filtering | General purpose algorithm with embeddings and biases for users and items |
-| LightGBM/Gradient Boosting Tree<sup>*</sup> | [Python CPU](notebooks/00_quick_start/lightgbm_tinycriteo.ipynb) / [PySpark](notebooks/02_model/mmlspark_lightgbm_criteo.ipynb) | Content-Based Filtering | Gradient Boosting Tree algorithm for fast training and low memory usage in content-based problems |
-| Neural Collaborative Filtering (NCF) | [Python CPU / Python GPU](notebooks/00_quick_start/ncf_movielens.ipynb) | Collaborative Filtering | Deep learning algorithm with enhanced performance for implicit feedback | 
-| Restricted Boltzmann Machines (RBM) | [Python CPU / Python GPU](notebooks/00_quick_start/rbm_movielens.ipynb) | Collaborative Filtering | Neural network based algorithm for learning the underlying probability distribution for explicit or implicit feedback | 
-| Riemannian Low-rank Matrix Completion (RLRMC)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/rlrmc_movielens.ipynb) | Collaborative Filtering | Matrix factorization algorithm using Riemannian conjugate gradients optimization with small memory consumption. |
-| Simple Algorithm for Recommendation (SAR)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/sar_movielens.ipynb) | Collaborative Filtering | Similarity-based algorithm for implicit feedback dataset |
-| Surprise/Singular Value Decomposition (SVD) | [Python CPU](notebooks/02_model/surprise_svd_deep_dive.ipynb) | Collaborative Filtering | Matrix factorization algorithm for predicting explicit rating feedback in datasets that are not very large | 
-| Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](notebooks/02_model/vowpal_wabbit_deep_dive.ipynb) | Content-Based Filtering | Fast online learning algorithms, great for scenarios where user features / context are constantly changing |
-| Wide and Deep | [Python CPU / Python GPU](notebooks/00_quick_start/wide_deep_movielens.ipynb) | Hybrid | Deep learning algorithm that can memorize feature interactions and generalize user features |
+| Alternating Least Squares (ALS) | [PySpark](notebooks/00_quick_start/als_movielens.ipynb) | 協調フィルタリング | スケーラビリティと分散コンピューティングが可能な Spark MLLib に最適化された、大規模なデータセットにおける明示的または暗黙的なフィードバックのための行列因子分解アルゴリズム | 
+| Deep Knowledge-Aware Network (DKN)<sup>*</sup> | [Python CPU / Python GPU](notebooks/00_quick_start/dkn_synthetic.ipynb) | コンテンツベース フィルタリング | ナレッジグラフと記事の埋め込みを組み込んだディープラーニングアルゴリズムにより、強力なニュースや記事のレコメンデーションを提供 | 
+| Extreme Deep Factorization Machine (xDeepFM)<sup>*</sup> | [Python CPU / Python GPU](notebooks/00_quick_start/xdeepfm_criteo.ipynb) | ハイブリッド | ユーザー/アイテムのフィーチャーを使用した暗黙的及び明示的なフィードバックのためのディープラーニングベースのアルゴリズム | 
+| FastAI Embedding Dot Bias (FAST) | [Python CPU / Python GPU](notebooks/00_quick_start/fastai_movielens.ipynb) | 協調フィルタリング | ユーザーとアイテムの埋め込みとバイアスを含む汎用アルゴリズム |
+| LightGBM/Gradient Boosting Tree<sup>*</sup> | [Python CPU](notebooks/00_quick_start/lightgbm_tinycriteo.ipynb) / [PySpark](notebooks/02_model/mmlspark_lightgbm_criteo.ipynb) | コンテンツベース フィルタリング | コンテンツベースの問題における高速トレーニングと低メモリ使用量の勾配ブースティング ツリー アルゴリズム |
+| Neural Collaborative Filtering (NCF) | [Python CPU / Python GPU](notebooks/00_quick_start/ncf_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバックの性能を強化したディープラーニングアルゴリズム | 
+| Restricted Boltzmann Machines (RBM) | [Python CPU / Python GPU](notebooks/00_quick_start/rbm_movielens.ipynb) | 協調フィルタリング | 明示的または暗黙的なフィードバックのための基礎となる確率分布を学習するためのニューラルネットワークベースのアルゴリズム | 
+| Riemannian Low-rank Matrix Completion (RLRMC)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/rlrmc_movielens.ipynb) | 協調フィルタリング | 低メモリ消費量に最適化されたリーマン共役勾配放を使用した行列因子アルゴリズム |
+| Simple Algorithm for Recommendation (SAR)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/sar_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバック データセット用の類似性ベースのアルゴリズム |
+| Surprise/Singular Value Decomposition (SVD) | [Python CPU](notebooks/02_model/surprise_svd_deep_dive.ipynb) | 協調フィルタリング | それほど大きくないデータセット内の明示的な評価フィードバックを予測するための行列因子化アルゴリズム | 
+| Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](notebooks/02_model/vowpal_wabbit_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザーのフィーチャー/コンテキストが絶えず変化するシナリオに最適な高速オンライン学習アルゴリズム |
+| Wide and Deep | [Python CPU / Python GPU](notebooks/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | フィーチャの相互作用を記憶し、ユーザーのフィーチャーを一般化できるディープラーニング アルゴリズム |
 
 
-**NOTE**: <sup>*</sup> indicates algorithms invented/contributed by Microsoft.
+**注**: <sup>*</sup> 印のアルゴリズムは Microsoft によって開発/寄贈されたアルゴリズム。
 
-**Preliminary Comparison**
+**基礎的な比較**
 
-We provide a [benchmark notebook](benchmark/movielens.ipynb) to illustrate how different algorithms could be evaluated and compared. In this notebook, MovieLens dataset is splitted into training/test sets at a 75/25 ratio using a stratified split. A recommendation model is trained using each of the collaborative filtering algorithms below. We utilize empirical parameter values reported in literature [here](http://mymedialite.net/examples/datasets.html). For ranking metrics we use `k=10` (top 10 recommended items). We run the comparison on a Standard NC6s_v2 [Azure DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (6 vCPUs, 112 GB memory and 1 P100 GPU). Spark ALS is run in local standalone mode. In this table we show the results on Movielens 100k, running the algorithms for 15 epochs.
+異なるアルゴリズムを評価、比較した[ベンチマーク ノートブック](benchmark/movielens.ipynb)を提供します。
+ In this notebook, MovieLens dataset is splitted into training/test sets at a 75/25 ratio using a stratified split. A recommendation model is trained using each of the collaborative filtering algorithms below. We utilize empirical parameter values reported in literature [here](http://mymedialite.net/examples/datasets.html). 
+ このノートブックでは、MovieLens データセットは単純分割を使用して 75/25 の比率でトレーニング/テスト セットに分割しました。レコメンデーション モデルは、以下の各協調フィルタリング アルゴリズムを使用してトレーニングしました。経験的パラメータは[この](http://mymedialite.net/examples/datasets.html)文献で報告された値を利用しています。
+ 私たちが使用したランキング メトリクスは `k=10` ( トップ 10 のレコメンド アイテム) です。比較の際にはスタンダード  NC6s_v2 [Azure DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (6 vCPUs, 112 GB メモリと 1 P100 GPU) を使用しています。Spark ALS はローカル スタンドアローン モードで実行しました。 この表の結果は Movielens のデータ数 100k、アルゴリズムは 15 エポック実行したものです。
 
-| Algo | MAP | nDCG@k | Precision@k | Recall@k | RMSE | MAE | R<sup>2</sup> | Explained Variance | 
+| Algo | 平均的適合率平均(MAP) | 正規化減損累積利得(nDCG)@k | 適合率(Precision)@k | 再現率(Recall)@k | 平均二乗平方根誤差(RMSE) | 平均絶対誤差(MAE) | 決定係数 (R<sup>2</sup>) | 説明分散 | 
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | 
 | [ALS](notebooks/00_quick_start/als_movielens.ipynb) | 0.004732 |	0.044239 |	0.048462 |	0.017796 | 0.965038 |	0.753001 |	0.255647 |	0.251648 | 
 | [SVD](notebooks/02_model/surprise_svd_deep_dive.ipynb) | 0.012873	| 0.095930 |	0.091198 |	0.032783 | 0.938681 |	0.742690	| 0.291967 |	0.291971 |
@@ -78,11 +91,12 @@ We provide a [benchmark notebook](benchmark/movielens.ipynb) to illustrate how d
 
 
 
-## Contributing
-This project welcomes contributions and suggestions. Before contributing, please see our [contribution guidelines](CONTRIBUTING.md).
+## 貢献するには
+
+このプロジェクトは貢献と提案を歓迎しています。貢献を行う前には [貢献のガイドライン](CONTRIBUTING.md) を始めにご覧ください。
 
 
-## Build Status
+## ビルド状態
 
 | Build Type | Branch | Status |  | Branch | Status | 
 | --- | --- | --- | --- | --- | --- | 

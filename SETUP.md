@@ -1,67 +1,64 @@
-# Setup guide
+# セットアップ ガイド
 
-This document describes how to setup all the dependencies to run the notebooks in this repository in following platforms:
+このドキュメントでは、このリポジトリに置かれているノートブックを次のプラットフォームで実行するための、すべての依存関係をセットアップする方法について説明します:
 
-* Local (Linux, MacOS or Windows) or [DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (Linux or Windows)
+* ローカル (Linux, MacOS または Windows) または [DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (Linux or Windows)
 * [Azure Databricks](https://azure.microsoft.com/en-us/services/databricks/)
 
+## 目次
 
-## Table of Contents
+* [コンピュート環境](#コンピュート環境)
+* [ローカル または DSVM 用のセットアップ ガイド](#ローカル-または-DSVM-用のセットアップ-ガイド)
+  * [要件](#要件)
+  * [依存関係のセットアップ](#依存関係のセットアップ)
+  * [Jupyter 内でカーネルとして conda 環境を登録する](#Jupyter-内でカーネルとして-conda-環境を登録する)
+  * [DSVM でのトラブルシューティング](#DSVM-でのトラブルシューティング)
+* [Azure Databricks 用のセットアップ ガイド](#Azure-Databricks-用のセットアップ-ガイド)
+  * [Azure Databricks の要件](#requirements-of-azure-databricks)
+  * [リポジトリのインストール](#リポジトリのインストール)
+  * [Azure Databricks でのインストールにおけるトラブルシューティング](#Azure-Databricks-でのインストールにおけるトラブルシューティング)
+* [Azure Databricks における運用化の準備](#Azure-Databricks-における運用化の準備)
 
-* [Compute environments](#compute-environments)
-* [Setup guide for Local or DSVM](#setup-guide-for-local-or-dsvm)
-  * [Requirements](#requirements)
-  * [Dependencies setup](#dependencies-setup)
-  * [Register the conda environment as a kernel in Jupyter](#Register-the-conda-environment-as-a-kernel-in-Jupyter)
-  * [Troubleshooting for the DSVM](#troubleshooting-for-the-dsvm)
-* [Setup guide for Azure Databricks](#setup-guide-for-azure-databricks)
-  * [Requirements of Azure Databricks](#requirements-of-azure-databricks)
-  * [Repository installation](#repository-installation)
-  * [Troubleshooting Installation on Azure Databricks](#Troubleshooting-Installation-on-Azure-Databricks)
-* [Prepare Azure Databricks for Operationalization](#prepare-azure-databricks-for-operationalization)
+## コンピュート環境
 
-## Compute environments
+レコメンド システムの種類と実行する必要があるノートブックに応じて、要求されるコンピュート環境が異なります。
+現在、このリポジトリは **Python CPU**、**Python GPU**および**PySpark**をサポートしています。
 
-Depending on the type of recommender system and the notebook that needs to be run, there are different computational requirements.
-Currently, this repository supports **Python CPU**, **Python GPU** and **PySpark**.
+## ローカル または DSVM 用のセットアップ ガイド
 
+### 要件
 
-## Setup guide for Local or DSVM
+* Linux,MacOS または Windows が動作しているマシン
+* Anaconda と共にインストールされたバージョン 3.6 以上の Python
+  * Azure DSVM のようなプレインストールされているコンピュート環境を利用する場合には、そのまま次のステップに進んでください。ローカルマシンにセットアップを行う場合には、以下のサイトで詳細をご確認ください。  
+  [Miniconda](https://docs.conda.io/en/latest/miniconda.html) は簡単に始めることができる方法です。
+* [Apache Spark](https://spark.apache.org/downloads.html) (これは PySpark 環境でのみ必要になります)
 
-### Requirements
+### 依存関係のセットアップ
 
-* A machine running Linux, MacOS or Windows
-* Anaconda with Python version >= 3.6
-  * This is pre-installed on Azure DSVM such that one can run the following steps directly. To setup on your local machine,
-  [Miniconda](https://docs.conda.io/en/latest/miniconda.html) is a quick way to get started.
-* [Apache Spark](https://spark.apache.org/downloads.html) (this is only needed for the PySpark environment).
-
-### Dependencies setup
-
-As a pre-requisite to install the dependencies with Conda, make sure that Anaconda and the package manager Conda are both up to date:
+Conda を使用した必要要件のインストールを行う際には、Anaconda と Conda パッケージ マネージャー が最新であることを確認してください:
 
 ```{shell}
 conda update conda -n root
 conda update anaconda        # use 'conda install anaconda' if the package is not installed
 ```
 
-We provide a script, [generate_conda_file.py](scripts/generate_conda_file.py), to generate a conda-environment yaml file
-which you can use to create the target environment using the Python version 3.6 with all the correct dependencies.
+私たちは conda 環境用 yaml ファイルを生成するスクリプト [generate_conda_file.py](scripts/generate_conda_file.py)を提供しています。これを使用することで、すべての正しい依存関係をと、Python バージョン 3.6 を使用してターゲット環境を作成することできます。
 
-Assuming the repo is cloned as `Recommenders` in the local system, to install **a default (Python CPU) environment**:
+仮にローカルシステムにクローンされたリポジトリが `Recommenders` であった場合、**デフォルト (Python CPU) の環境** をインストールする場合には以下のように実行します:
 
     cd Recommenders
     python scripts/generate_conda_file.py
     conda env create -f reco_base.yaml 
 
-You can specify the environment name as well with the flag `-n`.
+環境名は `-n` フラグを使用することで指定することが可能です。
 
-Click on the following menus to see how to install Python GPU and PySpark environments:
+Python GPU および PySpark 環境のインストールについては、以下のメニューをクリックしてください:
 
 <details>
-<summary><strong><em>Python GPU environment</em></strong></summary>
+<summary><strong><em>Python GPU 環境</em></strong></summary>
 
-Assuming that you have a GPU machine, to install the Python GPU environment:
+GPU マシンを持っている場合には、以下のように Python GPU 環境をインストールすることが可能です:
 
     cd Recommenders
     python scripts/generate_conda_file.py --gpu
@@ -70,9 +67,9 @@ Assuming that you have a GPU machine, to install the Python GPU environment:
 </details>
 
 <details>
-<summary><strong><em>PySpark environment</em></strong></summary>
+<summary><strong><em>PySpark 環境</em></strong></summary>
 
-To install the PySpark environment:
+PySpark 環境のインストールは以下のように指定します:
 
     cd Recommenders
     python scripts/generate_conda_file.py --pyspark
@@ -85,10 +82,10 @@ Additionally, if you want to test a particular version of spark, you may pass th
 </details>
 
 <details>
-<summary><strong><em>Full (PySpark & Python GPU) environment</em></strong></summary>
+<summary><strong><em>完全 (PySpark と Python GPU) 環境</em></strong></summary>
 
-With this environment, you can run both PySpark and Python GPU notebooks in this repository.
-To install the environment:
+この環境では、このリポジトリ内にある PySpark 及び Python GPU 用のノートブックのどちらも動作させることが可能です。
+この環境をインストールするには以下のように実行します:
 
     cd Recommenders
     python scripts/generate_conda_file.py --gpu --pyspark
@@ -97,17 +94,15 @@ To install the environment:
 </details>
 
 
-> **NOTE** - for PySpark environments (`reco_pyspark` and `reco_full`), we need to set the environment variables
-> `PYSPARK_PYTHON` and `PYSPARK_DRIVER_PYTHON` to point to the conda python executable.
+> **注** - PySpark 環境 (`reco_pyspark` および `reco_full`) においては、`PYSPARK_PYTHON` と `PYSPARK_DRIVER_PYTHON` の環境変数を作成し、conda の python 実行ファイルを指定する必要があります。
 >
-> Click on the following menus to see details:
+> 詳細を確認するには以下のメニューをクリックします:
 >
 > <details>
-> <summary><strong><em>Linux or MacOS</em></strong></summary>
+> <summary><strong><em>Linux または MacOS</em></strong></summary>
 >
-> To set these variables every time the environment is activated, we can follow the steps of this [guide](https://conda.io/docs/user-guide/tasks/manage-environments.html#macos-and-linux).
-> Assuming that we have installed the environment in `/anaconda/envs/reco_pyspark`,
-> create the file `/anaconda/envs/reco_pyspark/etc/conda/activate.d/env_vars.sh` and add:
+> これらの環境変数を環境がアクティベートされる度にセットするには、この[ガイド](https://conda.io/docs/user-guide/tasks/manage-environments.html#macos-and-linux)のステップに従う必要があります。
+インストールされた環境が `/anaconda/envs/reco_pyspark` だった場合には、`/anaconda/envs/reco_pyspark/etc/conda/activate.d/env_vars.sh`ファイルを作成し、以下の内容を追記します:
 >
 >     ```bash
 >     #!/bin/sh
@@ -117,9 +112,8 @@ To install the environment:
 >     unset SPARK_HOME
 >     ```
 >
-> This will export the variables every time we do `conda activate reco_pyspark`.
-> To unset these variables when we deactivate the environment,
-> create the file `/anaconda/envs/reco_pyspark/etc/conda/deactivate.d/env_vars.sh` and add:
+> これにより、`conda activate reco_pyspark` が実行される度に環境変数のエクスポートが実行されます。
+> 非アクティブ化した際にこれらの変数を無効化するには、`/anaconda/envs/reco_pyspark/etc/conda/deactivate.d/env_vars.sh`ファイルを作成し、以下の内容を追記します:
 >
 >     ```bash
 >     #!/bin/sh
@@ -133,9 +127,8 @@ To install the environment:
 >
 > <details><summary><strong><em>Windows</em></strong></summary>
 > 
-> To set these variables every time the environment is activated, we can follow the steps of this [guide](https://conda.io/docs/user-guide/tasks/manage-environments.html#windows).
-> Assuming that we have installed the environment in `c:\anaconda\envs\reco_pyspark`,
-> create the file `c:\anaconda\envs\reco_pyspark\etc\conda\activate.d\env_vars.bat` and add:
+> これらの環境変数を環境がアクティベートされる度にセットするには、この[ガイド](https://conda.io/docs/user-guide/tasks/manage-environments.html#windows)のステップに従う必要があります。
+インストールされた環境が `c:\anaconda\envs\reco_pyspark` だった場合には、`c:\anaconda\envs\reco_pyspark\etc\conda\activate.d\env_vars.bat`ファイルを作成し、以下の内容を追記します:
 > 
 >     @echo off
 >     set PYSPARK_PYTHON=c:\anaconda\envs\reco_pyspark\python.exe
@@ -145,9 +138,8 @@ To install the environment:
 >     set PYTHONPATH_BACKUP=%PYTHONPATH%
 >     set PYTHONPATH=
 > 
-> This will export the variables every time we do `conda activate reco_pyspark`.
-> To unset these variables when we deactivate the environment,
-> create the file `c:\anaconda\envs\reco_pyspark\etc\conda\deactivate.d\env_vars.bat` and add:
+> これにより、`conda activate reco_pyspark` が実行される度に環境変数のエクスポートが実行されます。
+> 非アクティブ化した際にこれらの変数を無効化するには、`c:\anaconda\envs\reco_pyspark\etc\conda\deactivate.d\env_vars.bat`ファイルを作成し、以下の内容を追記します:
 > 
 >     @echo off
 >     set PYSPARK_PYTHON=
@@ -160,19 +152,19 @@ To install the environment:
 > </details>
 
 
-### Register the conda environment as a kernel in Jupyter
+### Jupyter 内でカーネルとして conda 環境を登録する
 
-We can register our created conda environment to appear as a kernel in the Jupyter notebooks.
+作成した conda 環境は、Jupyter ノートブックに表示されるように登録することが可能です。
 
     conda activate my_env_name
     python -m ipykernel install --user --name my_env_name --display-name "Python (my_env_name)"
     
-If you are using the DSVM, you can [connect to JupyterHub](https://docs.microsoft.com/en-us/azure/machine-learning/data-science-virtual-machine/dsvm-ubuntu-intro#jupyterhub-and-jupyterlab) by browsing to `https://your-vm-ip:8000`.
+DSVM を使用している場合には、Web ブラウザで `https://your-vm-ip:8000` にアクセスし、[JupyterHub に接続](https://docs.microsoft.com/en-us/azure/machine-learning/data-science-virtual-machine/dsvm-ubuntu-intro#jupyterhub-and-jupyterlab) することが可能です。
 
-### Troubleshooting for the DSVM
+### DSVM でのトラブルシューティング
 
-* We found that there can be problems if the Spark version of the machine is not the same as the one in the conda file. You can use the option `--pyspark-version` to address this issue.
-* When running Spark on a single local node it is possible to run out of disk space as temporary files are written to the user's home directory. To avoid this on a DSVM, we attached an additional disk to the DSVM and made modifications to the Spark configuration. This is done by including the following lines in the file at `/dsvm/tools/spark/current/conf/spark-env.sh`.
+* マシンの Spark バージョンが conda ファイルのバージョンと同じでない場合、問題が発生する可能性があることがわかりました。`--pyspark-version` オプションを使用することでこの問題を回避することが可能です。
+* 単一のローカル ノードで Spark を実行すると、一時ファイルがユーザーのホーム ディレクトリに書き込まれるため、ディスク領域が不足する可能性があります。DSVM でこれを回避するためには、DSVM に追加のディスクを接続し、Spark 構成を変更します。これを行うには、`/dsvm/tools/spark/current/conf/spark-env.sh` のファイルに以下の内容を追記します。
 
 ```{shell}
 SPARK_LOCAL_DIRS="/mnt"
@@ -180,33 +172,33 @@ SPARK_WORKER_DIR="/mnt"
 SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true, -Dspark.worker.cleanup.appDataTtl=3600, -Dspark.worker.cleanup.interval=300, -Dspark.storage.cleanupFilesAfterExecutorExit=true"
 ```
 
-## Setup guide for Azure Databricks
+## Azure Databricks 用のセットアップ ガイド
 
-### Requirements of Azure Databricks
+### Azure Databricks の要件
 
-* Databricks Runtime version 4.3 (Apache Spark 2.3.1, Scala 2.11) or greater
+* Databricks のランタイム バージョンが 4.3 (Apache Spark 2.3.1, Scala 2.11) 以上
 * Python 3
 
-An example of how to create an Azure Databricks workspace and an Apache Spark cluster within the workspace can be found from [here](https://docs.microsoft.com/en-us/azure/azure-databricks/quickstart-create-databricks-workspace-portal). To utilize deep learning models and GPUs, you may setup GPU-enabled cluster. For more details about this topic, please see [Azure Databricks deep learning guide](https://docs.azuredatabricks.net/applications/deep-learning/index.html).   
+ワークスペース内に Azure Databricks ワークスペースと Apache Spark クラスターを作成する方法の例については、[こちら](https://docs.microsoft.com/en-us/azure/azure-databricks/quickstart-create-databricks-workspace-portal) を参照してください。ディープラーニング モデルと GPU を使用するには、GPU 対応クラスターをセットアップします。このトピックの詳細については、[Azure Databricks ディープラーニング ガイド](https://docs.azuredatabricks.net/applications/deep-learning/index.html)を参照してください。  
 
-### Repository installation
-You can setup the repository as a library on Databricks either manually or by running an [installation script](scripts/databricks_install.py). Both options assume you have access to a provisioned Databricks workspace and cluster and that you have appropriate permissions to install libraries.
+### リポジトリのインストール
+リポジトリを Databricks のライブラリとして手動でセットアップするか、[インストール スクリプト](scripts/databricks_install.py)を実行して設定します。どちらのオプションも、プロビジョニングされた Databricks ワークスペースとクラスターにアクセスでき、ライブラリをインストールするための適切なアクセス許可があることを前提としています。
 
 <details>
-<summary><strong><em>Quick install</em></strong></summary>
+<summary><strong><em>クイック インストール</em></strong></summary>
 
-This option utilizes an installation script to do the setup, and it requires additional dependencies in the environment used to execute the script.
+このオプションはセットアップを実行するためにインストール スクリプトを使用し、スクリプトを実行することで必要な追加の依存関係をしてに使用される環境で追加の依存関係をインストールします。
 
-> To run the script, following **prerequisites** are required:
-> * Setup CLI authentication for [Azure Databricks CLI (command-line interface)](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#install-the-cli). Please find details about how to create a token and set authentication [here](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#set-up-authentication). Very briefly, you can install and configure your environment with the following commands.
+> スクリプトを実行には、以下の**前提条件**が必要になります:
+> * [Azure Databricks CLI (コマンドライン インターフェース)](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#install-the-cli)用の CLI 認証のセットアップ。[ここ](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#set-up-authentication)でトークンの作成と認証の設定方法の詳細を確認してください。簡潔に言うと、次のコマンドを使用して環境をインストールおよび構成可能です。
 >
 >     ```{shell}
 >     conda activate reco-pyspark
 >     databricks configure --token
 >     ```
 >
-> * Get the target **cluster id** and **start** the cluster if its status is *TERMINATED*.
->   * You can get the cluster id from the databricks CLI with:
+> * 状態が *TERMINATED* の場合には、ターゲットの **cluster id** を使用して クラスタの **start** を実施する必要があります。
+>   * CLI でクラスタ ID を確認するには、以下の内容を実行します:
 >        ```{shell}
 >        databricks clusters list
 >        ```
@@ -215,102 +207,101 @@ This option utilizes an installation script to do the setup, and it requires add
 >        databricks clusters start --cluster-id <CLUSTER_ID>`
 >        ```
 
-The installation script has a number of options that can also deal with different databricks-cli profiles, install a version of the mmlspark library, overwrite the libraries, or prepare the cluster for operationalization. For all options, please see:
+インストール スクリプトには、さまざまな databricks-cli プロファイルを処理したり、mmlspark ライブラリのバージョンをインストールしたり、ライブラリを上書きしたり、クラスターを操作用に準備したりできるオプションが多数用意されています。すべてのオプションについては、以下を参照してください:
 
 ```{shell}
 python scripts/databricks_install.py -h
 ```
 
-Once you have confirmed the databricks cluster is *RUNNING*, install the modules within this repository with the following commands. 
+databricks クラスターが *RUNNING* であることを確認したら、次のコマンドを使用してこのリポジトリ内のモジュールをインストールします。
 
 ```{shell}
 cd Recommenders
 python scripts/databricks_install.py <CLUSTER_ID>
 ```
 
-**Note** If you are planning on running through the sample code for operationalization [here](notebooks/05_operationalize/als_movie_o16n.ipynb), you need to prepare the cluster for operationalization. You can do so by adding an additional option to the script run. <CLUSTER_ID> is the same as that mentioned above, and can be identified by running `databricks clusters list` and selecting the appropriate cluster.
+**注** 運用化のための[この](notebooks/05_operationalize/als_movie_o16n.ipynb)サンプル コードを実行する予定がある場合には、運用化のためにクラスターを準備する必要があります。これを行うには、スクリプトの実行に追加のオプションを追加します。<CLUSTER_ID> は前述の <CLUSTER_ID> と同じで、`databricks clusters list` を実行し、適切なクラスターを選択することで識別できます。
 
 ```{shell}
 python ./scripts/databricks_install.py --prepare-o16n <CLUSTER_ID>
 ```
 
-See below for details.
-
+詳細は以下を参照してください。
 </details>
 
 <details>
-<summary><strong><em>Manual setup</em></strong></summary>
+<summary><strong><em>手動セットアップ</em></strong></summary>
 
-To install the repo manually onto Databricks, follow the steps:
+リポジトリを Databricks に手動でインストールするには、次の手順に従います:
 
-1. Clone the Microsoft Recommenders repository to your local computer.
-2. Zip the contents inside the Recommenders folder (Azure Databricks requires compressed folders to have the `.egg` suffix, so we don't use the standard `.zip`):
+1. Microsoft Recommenders リポジトリをローカル コンピュータにクローンします。
+2. Recommenders フォルダ内のコンテンツを圧縮します(Azure Databricks では、圧縮フォルダに '.egg' サフィックスが必要なので、標準の '.zip' を使用しません)。
 
     ```{shell}
     cd Recommenders
     zip -r Recommenders.egg .
     ```
-3. Once your cluster has started, go to the Databricks workspace, and select the `Home` button.
-4. Your `Home` directory should appear in a panel. Right click within your directory, and select `Import`.
-5. In the pop-up window, there is an option to import a library, where it says: `(To import a library, such as a jar or egg, click here)`. Select `click here`.
-6. In the next screen, select the option `Upload Python Egg or PyPI` in the first menu.
-7. Next, click on the box that contains the text `Drop library egg here to upload` and use the file selector to choose the `Recommenders.egg` file you just created, and select `Open`.
-8. Click on the `Create library`. This will upload the egg and make it available in your workspace.
-9. Finally, in the next menu, attach the library to your cluster.
+
+3. クラスターが起動したら、databricks ワークスペースに移動し、`Home` ボタンを選択します。
+4. `Home` ディレクトリがパネルに表示されます。ディレクトリ内を右クリックし、`Import` を選択します。
+5. ポップアップ ウィンドウには、ライブラリをインポートするオプションがあり、`(To import a library, such as a jar or egg, click here)`と表示されます。`click here` を選択します。
+6. 次の画面で、最初のメニューで `Upload Python Egg or PyPI` オプションを選択します。
+7. 次に、`Drop library egg here to upload` というテキストが含まれているボックスをクリックし、ファイルセレクタを使用して作成した `Recommenders.egg` ファイルを選択し、`Open` を選択します。
+8. `Create library` をクリックします。これにより、卵がアップロードされ、ワークスペースで使用できるようになります。
+9. 最後に、次のメニューで、ライブラリをクラスタにアタッチします。
 
 </details>
 
-### Confirm Installation
+### インストールの確認
 
-After installation, you can now create a new notebook and import the utilities from Databricks in order to confirm that the import worked.
+インストール後、新しいノートブックを作成し、Databricks からユーティリティをインポートして、インポートが機能したことを確認できるようになります。
 
 ```{python}
 import reco_utils
 ```
 
-### Troubleshooting Installation on Azure Databricks
+### Azure Databricks でのインストールにおけるトラブルシューティング
 
-* For the [reco_utils](reco_utils) import to work on Databricks, it is important to zip the content correctly. The zip has to be performed inside the Recommenders folder, if you zip directly above the Recommenders folder, it won't work.
+* [reco_utils](reco_utils)をインポートして Databricks で動作させるには、コンテンツを正しく圧縮することが重要です。zip は Recommenders フォルダ内で実行する必要があり、Recommenders フォルダ自体を zip を入れても動作しません。
 
-## Prepare Azure Databricks for Operationalization
+## Azure Databricks における運用化の準備
 
-This repository includes an end-to-end example notebook that uses Azure Databricks to estimate a recommendation model using matrix factorization with Alternating Least Squares, writes pre-computed recommendations to Azure Cosmos DB, and then creates a real-time scoring service that retrieves the recommendations from Cosmos DB. In order to execute that [notebook](notebooks/05_operationalize/als_movie_o16n.ipynb), you must install the Recommenders repository as a library (as described above), **AND** you must also install some additional dependencies. With the *Quick install* method, you just need to pass an additional option to the [installation script](scripts/databricks_install.py).
+このリポジトリには、Azure Databricks を使用して最小二乗法を用いた行列因子化を利用したレコメンデーション モデルを推定し、事前に計算されたレコメンデーション アイテムを Azure Cosmos DB に書き込み、Cosmos DBからレコメンデーション アイテムを取得するリアルタイムスコアリングサービスを作成する方法が全て記載されたノートブックが含まれています。この [ノートブック](notebooks/05_operationalize/als_movie_o16n.ipynb)を実行するには、(前述のように) Recommenders リポジトリをライブラリとしてインストールする必要があり、 **かつ** いくつかの追加の依存関係をインストールする必要があります。*クイックインストール* 方法を使用すると、[インストールスクリプト](scripts/databricks_install.py)にいくつかの追加オプションを渡すだけで構成が可能です。
 
 <details>
-<summary><strong><em>Quick install</em></strong></summary>
+<summary><strong><em>クイック インストール</em></strong></summary>
 
-This option utilizes the installation script to do the setup. Just run the installation script
-with an additional option. If you have already run the script once to upload and install the `Recommenders.egg` library, you can also add an `--overwrite` option:
+このオプションは、インストール スクリプトを使用してセットアップを行います。追加のオプションを使用してインストール スクリプトを実行するだけです。`Recommenders.egg` ライブラリをアップロードしてインストールするためにスクリプトを既に 1 回実行している場合は、`--overwrite` オプションを追加することもできます:
 
 ```{shell}
 python scripts/databricks_install.py --overwrite --prepare-o16n <CLUSTER_ID>
 ```
 
-This script does all of the steps described in the *Manual setup* section below.
+このスクリプトは、以下の *手動セットアップ* セクションで説明されているすべての手順を実行します。
 
 </details>
 
 <details>
-<summary><strong><em>Manual setup</em></strong></summary>
+<summary><strong><em>手動セットアップ</em></strong></summary>
 
-You must install three packages as libraries from PyPI:
+PyPI からライブラリとして、以下の 3 つのパッケージをインストールする必要があります:
 
 * `azure-cli==2.0.56`
 * `azureml-sdk[databricks]==1.0.8`
 * `pydocumentdb==2.3.3`
 
-You can follow instructions [here](https://docs.azuredatabricks.net/user-guide/libraries.html#install-a-library-on-a-cluster) for details on how to install packages from PyPI.
+PyPI からパッケージをインストールする方法の詳細については、[こちら](https://docs.azuredatabricks.net/user-guide/libraries.html#install-a-library-on-a-cluster)の手順に従って実施します。
 
-Additionally, you must install the [spark-cosmosdb connector](https://docs.databricks.com/spark/latest/data-sources/azure/cosmosdb-connector.html) on the cluster. The easiest way to manually do that is to:
+さらに、クラスターに [spark-cosmosdb connector](https://docs.databricks.com/spark/latest/data-sources/azure/cosmosdb-connector.html) をインストールする必要があります。手動で行う最も簡単な方法は次のとおりです:
 
-1. Download the [appropriate jar](https://search.maven.org/remotecontent?filepath=com/microsoft/azure/azure-cosmosdb-spark_2.3.0_2.11/1.2.2/azure-cosmosdb-spark_2.3.0_2.11-1.2.2-uber.jar) from MAVEN. **NOTE** This is the appropriate jar for spark versions `2.3.X`, and is the appropriate version for the recommended Azure Databricks run-time detailed above.
-2. Upload and install the jar by:
-   1. Log into your `Azure Databricks` workspace
-   2. Select the `Clusters` button on the left.
-   3. Select the cluster on which you want to import the library.
-   4. Select the `Upload` and `Jar` options, and click in the box that has the text `Drop JAR here` in it.
-   5. Navigate to the downloaded `.jar` file, select it, and click `Open`.
-   6. Click on `Install`.
-   7. Restart the cluster.
+1. [適切な jar ファイル](https://search.maven.org/remotecontent?filepath=com/microsoft/azure/azure/azure-cosmosdb-spark_2.3.0_2.11/1.2.2/azure-cosmosdb-spark_2.3.0_2.11-1.2.2-uber.jar)を MAVEN からダウンロードしてください。**注** これは Spark バージョン '2.3.X' に適した jar であり、上記で詳しく説明した推奨の Azure Databricks ランタイムに適したバージョンです。
+2. jar をアップロードしてインストールします。
+   1. 「Azure Databrics」ワークスペースにログインする
+   2. 左側の `Clusters` ボタンを選択します。
+   3. ライブラリをインポートするクラスターを選択します。
+   4. `Upload` と `Jar` オプションを選択し、その中に `Drop JAR here` というテキストが入っているボックスをクリックします。
+   5. ダウンロードした `.jar` ファイルに移動し、それを選択し、`Open` をクリックします。
+   6. `Install`をクリックします。
+   7. クラスタを再起動します。
 
 </details>
