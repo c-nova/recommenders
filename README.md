@@ -12,7 +12,7 @@
 
 ## 使用方法
 
-ローカルマシン、Spark上、[Azure Databricks](SETUP.md#setup-guide-for-azure-databricks) での詳細な設定方法については、[セットアップ ガイド(SETUP.md) をご覧ください。
+ローカルマシン、Spark上、[Azure Databricks](SETUP.md#setup-guide-for-azure-databricks) での詳細な設定方法については、[セットアップ ガイド](SETUP.md) をご覧ください。
 
 ローカルマシンでセットアップするには:
 
@@ -75,7 +75,6 @@
 **基礎的な比較**
 
 異なるアルゴリズムを評価、比較した[ベンチマーク ノートブック](benchmark/movielens.ipynb)を提供します。
- In this notebook, MovieLens dataset is splitted into training/test sets at a 75/25 ratio using a stratified split. A recommendation model is trained using each of the collaborative filtering algorithms below. We utilize empirical parameter values reported in literature [here](http://mymedialite.net/examples/datasets.html). 
  このノートブックでは、MovieLens データセットは単純分割を使用して 75/25 の比率でトレーニング/テスト セットに分割しました。レコメンデーション モデルは、以下の各協調フィルタリング アルゴリズムを使用してトレーニングしました。経験的パラメータは[この](http://mymedialite.net/examples/datasets.html)文献で報告された値を利用しています。
  私たちが使用したランキング メトリクスは `k=10` ( トップ 10 のレコメンド アイテム) です。比較の際にはスタンダード  NC6s_v2 [Azure DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (6 vCPUs, 112 GB メモリと 1 P100 GPU) を使用しています。Spark ALS はローカル スタンドアローン モードで実行しました。 この表の結果は Movielens のデータ数 100k、アルゴリズムは 15 エポック実行したものです。
 
@@ -107,5 +106,4 @@
 | **Windows GPU** | master | [![Status](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_apis/build/status/nightly_gpu_win?branchName=master)](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_build/latest?definitionId=6756) | | staging | [![Status](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_apis/build/status/nightly_gpu_staging_win?branchName=staging)](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_build/latest?definitionId=6761) |
 | **Windows Spark** | master | [![Status](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_apis/build/status/nightly_spark_win?branchName=master)](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_build/latest?definitionId=6757) | | staging | [![Status](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_apis/build/status/nightly_spark_staging_win?branchName=staging)](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_build/latest?definitionId=6754) |
 
-**NOTE** - these tests are the nightly builds, which compute the smoke and integration tests. Master is our main branch and staging is our development branch. We use `pytest` for testing python utilities in [reco_utils](reco_utils) and `papermill` for the [notebooks](notebooks). For more information about the testing pipelines, please see the [test documentation](tests/README.md).
-
+**注** - これらのテストは、smoke の計算と統合テストを実行する nightly ビルドに対して行われています。Master は我々のメイン ブランチであり、Staging は我々の開発ブランチです。[reco_utils](reco_utils)内の Python ユーティリティをテストテストするために `pytest` を使用し、[ノートブック](notebooks)のテストには `papermill` を使用しています。テスト パイプラインの詳細については、[テスト ドキュメント](test/README.md)を参照してください。
