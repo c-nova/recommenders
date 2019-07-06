@@ -2,7 +2,7 @@
 
 このドキュメントでは、このリポジトリに置かれているノートブックを次のプラットフォームで実行するための、すべての依存関係をセットアップする方法について説明します:
 
-* ローカル (Linux, MacOS または Windows) または [DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (Linux or Windows)
+* ローカル (Linux, MacOS または Windows) または [DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (Linux または Windows)
 * [Azure Databricks](https://azure.microsoft.com/en-us/services/databricks/)
 
 ## 目次
@@ -31,7 +31,7 @@
 * Linux,MacOS または Windows が動作しているマシン
 * Anaconda と共にインストールされたバージョン 3.6 以上の Python
   * Azure DSVM のようなプレインストールされているコンピュート環境を利用する場合には、そのまま次のステップに進んでください。ローカルマシンにセットアップを行う場合には、以下のサイトで詳細をご確認ください。  
-  [Miniconda](https://docs.conda.io/en/latest/miniconda.html) は簡単に始めることができる方法です。
+  [Miniconda](https://docs.conda.io/en/latest/miniconda.html) は簡単に始められる方法です。
 * [Apache Spark](https://spark.apache.org/downloads.html) (これは PySpark 環境でのみ必要になります)
 
 ### 依存関係のセットアップ
@@ -75,7 +75,7 @@ PySpark 環境のインストールは以下のように指定します:
     python scripts/generate_conda_file.py --pyspark
     conda env create -f reco_pyspark.yaml
 
-Additionally, if you want to test a particular version of spark, you may pass the --pyspark-version argument:
+さらに、特定のバージョンの spark をテストする場合は、--pyspark-version 引数を渡します:
 
     python scripts/generate_conda_file.py --pyspark-version 2.4.0
 
@@ -189,8 +189,8 @@ SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true, -Dspark.worker.cleanup.a
 
 このオプションはセットアップを実行するためにインストール スクリプトを使用し、スクリプトを実行することで必要な追加の依存関係をしてに使用される環境で追加の依存関係をインストールします。
 
-> スクリプトを実行には、以下の**前提条件**が必要になります:
-> * [Azure Databricks CLI (コマンドライン インターフェース)](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#install-the-cli)用の CLI 認証のセットアップ。[ここ](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#set-up-authentication)でトークンの作成と認証の設定方法の詳細を確認してください。簡潔に言うと、次のコマンドを使用して環境をインストールおよび構成可能です。
+> スクリプトを実行するには、以下の**前提条件**が必要になります:
+> * [Azure Databricks CLI (コマンドライン インターフェース)](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#install-the-cli)用の CLI 認証のセットアップ。[ここ](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#set-up-authentication)でトークンの作成と認証の設定方法の詳細を確認してください（訳注：ここの方法を使用し、実際にポータル上で認証トークンの事前作成が必要です）。簡潔に言うと、次のコマンドを使用して環境をインストールおよび構成可能です。
 >
 >     ```{shell}
 >     conda activate reco-pyspark
@@ -294,7 +294,7 @@ PyPI からパッケージをインストールする方法の詳細について
 
 さらに、クラスターに [spark-cosmosdb connector](https://docs.databricks.com/spark/latest/data-sources/azure/cosmosdb-connector.html) をインストールする必要があります。手動で行う最も簡単な方法は次のとおりです:
 
-1. [適切な jar ファイル](https://search.maven.org/remotecontent?filepath=com/microsoft/azure/azure/azure-cosmosdb-spark_2.3.0_2.11/1.2.2/azure-cosmosdb-spark_2.3.0_2.11-1.2.2-uber.jar)を MAVEN からダウンロードしてください。**注** これは Spark バージョン '2.3.X' に適した jar であり、上記で詳しく説明した推奨の Azure Databricks ランタイムに適したバージョンです。
+1. [適切な jar ファイル](https://search.maven.org/remotecontent?filepath=com/microsoft/azure/azure/azure-cosmosdb-spark_2.3.0_2.11/1.2.2/azure-cosmosdb-spark_2.3.0_2.11-1.2.2-uber.jar)を MAVEN からダウンロードしてください。**注** これは Spark バージョン '2.3.x' に適した jar であり、上記で詳しく説明した推奨の Azure Databricks ランタイムに適したバージョンです。
 2. jar をアップロードしてインストールします。
    1. 「Azure Databrics」ワークスペースにログインする
    2. 左側の `Clusters` ボタンを選択します。
