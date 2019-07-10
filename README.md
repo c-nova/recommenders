@@ -63,7 +63,7 @@
 | LightGBM/Gradient Boosting Tree<sup>*</sup> | [Python CPU](notebooks/00_quick_start/lightgbm_tinycriteo.ipynb) / [PySpark](notebooks/02_model/mmlspark_lightgbm_criteo.ipynb) | コンテンツベース フィルタリング | コンテンツベースの問題における高速トレーニングと低メモリ使用量の勾配ブースティング ツリー アルゴリズム |
 | Neural Collaborative Filtering (NCF) | [Python CPU / Python GPU](notebooks/00_quick_start/ncf_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバックの性能を強化したディープラーニングアルゴリズム | 
 | Restricted Boltzmann Machines (RBM) | [Python CPU / Python GPU](notebooks/00_quick_start/rbm_movielens.ipynb) | 協調フィルタリング | 明示的または暗黙的なフィードバックのための基礎となる確率分布を学習するためのニューラルネットワークベースのアルゴリズム | 
-| Riemannian Low-rank Matrix Completion (RLRMC)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/rlrmc_movielens.ipynb) | 協調フィルタリング | 低メモリ消費量に最適化されたリーマン共役勾配放を使用した行列因子アルゴリズム |
+| Riemannian Low-rank Matrix Completion (RLRMC)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/rlrmc_movielens.ipynb) | 協調フィルタリング | 低メモリ消費量に最適化されたリーマン共役勾配法を使用した行列因子アルゴリズム |
 | Simple Algorithm for Recommendation (SAR)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/sar_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバック データセット用の類似性ベースのアルゴリズム |
 | Surprise/Singular Value Decomposition (SVD) | [Python CPU](notebooks/02_model/surprise_svd_deep_dive.ipynb) | 協調フィルタリング | それほど大きくないデータセット内の明示的な評価フィードバックを予測するための行列因子化アルゴリズム | 
 | Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](notebooks/02_model/vowpal_wabbit_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザーのフィーチャー/コンテキストが絶えず変化するシナリオに最適な高速オンライン学習アルゴリズム |
