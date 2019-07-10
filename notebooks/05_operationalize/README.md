@@ -1,19 +1,19 @@
-# Operationalize
+# 運用化
 
-In this directory, a notebook is provided to demonstrate how recommendation systems developed in a heterogeneous environment (e.g., Spark, GPU, etc.) can be operationalized.
+このディレクトリでは、異機種混在環境(Spark、GPUなど)で開発されたレコメンデーション システムがどのように運用可能かを示すノートブックを提供しています。
 
-| Notebook | Description | 
+| ノートブック | 詳細 | 
 | --- | --- | 
-| [als_movie_o16n](als_movie_o16n.ipynb) | End-to-end examples demonstrate how to build, evaluate, and deploy a Spark ALS based movie recommender with Azure services such as [Databricks](https://azure.microsoft.com/en-us/services/databricks/), [Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction), and [Kubernetes Services](https://azure.microsoft.com/en-us/services/kubernetes-service/).
+| [als_movie_o16n](als_movie_o16n.ipynb) | エンド ツー エンドの例では、[Databricks](https://azure.microsoft.com/ja-jp/services/databricks/)、[Cosmos DB](https://docs.microsoft.com/ja-jp/azure/cosmos-db/introduction)、[Kubernetes Services](https://azure.microsoft.com/ja-jp/services/kubernetes-service/) サービスなどの Azure サービスを使用して、Spark ALS ベースの映画レコメンダーを構築、評価、およびデプロイする方法を示します。
 
+## ワークフロー
 
-## Workflow
-The diagram below depicts how the best-practice examples help researchers / developers in the recommendation system development workflow.
+次の図は、レコメンデーション システム開発におけるワークフローの研究者/開発者に役立つベスト プラクティスの例を示しています。
 
 ![workflow](https://recodatasets.blob.core.windows.net/images/reco_workflow.png)
 
+## リファレンス アーキテクチャ
 
-## Reference Architecture
-A few Azure services are recommended for scalable data storage ([Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction)), model development ([Azure Databricks](https://azure.microsoft.com/en-us/services/databricks/), [Azure Data Science Virtual Machine](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (DSVM), [Azure Machine Learning service](https://azure.microsoft.com/en-us/services/machine-learning-service/)), and model operationalization ([Azure Kubernetes Services](https://azure.microsoft.com/en-us/services/kubernetes-service/) (AKS)). 
+スケーラブルなデータ ストレージ ([Azure Cosmos DB](https://docs.microsoft.com/ja-jp/azure/cosmos-db/introduction))、モデル開発 ([Azure Databricks](https://azure.microsoft.com/ja-jp/services/databricks/)、[Azure Data Science Virtual Machine](https://azure.microsoft.com/ja-jp/services/virtual-machines/data-science-virtual-machines/) (DSVM)、[Azure Machine Learning service](https://azure.microsoft.com/ja-jp/services/machine-learning-service/)、およびモデルの運用化 ([Azure Kubernetes Services](https://azure.microsoft.com/ja-jp/services/kubernetes-service/) (AKS)) には、いくつかの Azure サービスが推奨されます。
 
 ![architecture](https://recodatasets.blob.core.windows.net/images/reco-arch.png)
