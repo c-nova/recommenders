@@ -69,34 +69,34 @@ jupyter notebook
 
 | アルゴリズム | 環境 | 形式 | 詳細 | 
 | --- | --- | --- | --- |
-| Alternating Least Squares (ALS) | [PySpark](notebooks/00_quick_start/als_movielens.ipynb) | 協調フィルタリング | スケーラビリティと分散コンピューティングが可能な Spark MLLib に最適化された、大規模なデータセットにおける明示的または暗黙的なフィードバックのための行列因子分解アルゴリズム | 
+| Alternating Least Squares (ALS) | [PySpark](examples/00_quick_start/als_movielens.ipynb) | 協調フィルタリング | スケーラビリティと分散コンピューティングが可能な Spark MLLib に最適化された、大規模なデータセットにおける明示的または暗黙的なフィードバックのための行列因子分解アルゴリズム | 
 | Attentive Asynchronous Singular Value Decomposition (A2SVD)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | アテンション メカニズムを用いて長期ユーザー設定と短期ユーザ設定の両方を獲得することを目的とした順序ベースのアルゴリズム |
 | Cornac/Bayesian Personalized Ranking (BPR) | [Python CPU](examples/02_model_collaborative_filtering/cornac_bpr_deep_dive.ipynb) | 協調フィルタリング | 暗黙のフィードバックを伴う項目の順位を予測するための行列因子化アルゴリズム |
 | Convolutional Sequence Embedding Recommendation (Caser) | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | ユーザーの一般的な好みと順序パターンの両方をキャプチャすることを目的とした畳み込みベースのアルゴリズム |
-| Deep Knowledge-Aware Network (DKN)<sup>*</sup> | [Python CPU / Python GPU](notebooks/00_quick_start/dkn_synthetic.ipynb) | コンテンツベース フィルタリング | ナレッジグラフと記事の埋め込みを組み込んだディープラーニングアルゴリズムにより、強力なニュースや記事のレコメンデーションを提供 | 
-| Extreme Deep Factorization Machine (xDeepFM)<sup>*</sup> | [Python CPU / Python GPU](notebooks/00_quick_start/xdeepfm_criteo.ipynb) | ハイブリッド | ユーザー/アイテムのフィーチャーを使用した暗黙的及び明示的なフィードバックのためのディープラーニングベースのアルゴリズム | 
-| FastAI Embedding Dot Bias (FAST) | [Python CPU / Python GPU](notebooks/00_quick_start/fastai_movielens.ipynb) | 協調フィルタリング | ユーザーとアイテムの埋め込みとバイアスを含む汎用アルゴリズム |
+| Deep Knowledge-Aware Network (DKN)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/dkn_MIND.ipynb) | コンテンツベース フィルタリング | ナレッジグラフと記事の埋め込みを組み込んだディープラーニングアルゴリズムにより、強力なニュースや記事のレコメンデーションを提供 | 
+| Extreme Deep Factorization Machine (xDeepFM)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/xdeepfm_criteo.ipynb) | ハイブリッド | ユーザー/アイテムのフィーチャーを使用した暗黙的及び明示的なフィードバックのためのディープラーニングベースのアルゴリズム | 
+| FastAI Embedding Dot Bias (FAST) | [Python CPU / Python GPU](examples/00_quick_start/fastai_movielens.ipynb) | 協調フィルタリング | ユーザーとアイテムの埋め込みとバイアスを含む汎用アルゴリズム |
 | LightFM/Hybrid Matrix Factorization | [Python CPU](examples/02_model_hybrid/lightfm_deep_dive.ipynb) | ハイブリッド | 暗黙的および明示的フィードバックのハイブリッド行列分解アルゴリズム |
-| LightGBM/Gradient Boosting Tree<sup>*</sup> | [Python CPU](notebooks/00_quick_start/lightgbm_tinycriteo.ipynb) / [PySpark](notebooks/02_model/mmlspark_lightgbm_criteo.ipynb) | コンテンツベース フィルタリング | コンテンツベースの問題における高速トレーニングと低メモリ使用量の勾配ブースティング ツリー アルゴリズム |
+| LightGBM/Gradient Boosting Tree<sup>*</sup> | [Python CPU](examples/00_quick_start/lightgbm_tinycriteo.ipynb) / [PySpark](examples/02_model_content_based_filtering/mmlspark_lightgbm_criteo.ipynb) | コンテンツベース フィルタリング | コンテンツベースの問題における高速トレーニングと低メモリ使用量の勾配ブースティング ツリー アルゴリズム |
 | LightGCN | [Python CPU / Python GPU](examples/02_model_collaborative_filtering/lightgcn_deep_dive.ipynb) | 協調フィルタリング | 暗黙のフィードバックを予測するためのGCNの設計を簡素化するディープラーニングアルゴリズム |
 | GeoIMC | [Python CPU](examples/00_quick_start/geoimc_movielens.ipynb) | ハイブリッド | リーマン共役勾配最適化と幾何学的アプローチに従って、ユーザーと項目の変数を考慮に入れた行列補完アルゴリズム |
 | GRU4Rec | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | 回帰型ニューラルネットワークを用いて長期ユーザー設定と短期ユーザ嗜好の両方をキャプチャすることを目的とした順序ベースのアルゴリズム |
 | Multinomial VAE | [Python CPU / Python GPU](examples/02_model_collaborative_filtering/multi_vae_deep_dive.ipynb) | 協調フィルタリング | ユーザー/項目の相互作用を予測するための生成モデル |
 | Neural Recommendation with Long- and Short-term User Representations (LSTUR)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/lstur_MIND.ipynb) | コンテンツベース フィルタリング | 長期および短期ユーザーの交互モデリングを用いたニューラル レコメンデーション アルゴリズム |
 | Neural Recommendation with Attentive Multi-View Learning (NAML)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/naml_MIND.ipynb) | コンテンツベース フィルタリング | Attentive multi-view learning（アテンションを利用したマルチビュー学習）を用いたニューラル レコメンデーション アルゴリズム |
-| Neural Collaborative Filtering (NCF) | [Python CPU / Python GPU](notebooks/00_quick_start/ncf_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバックの性能を強化したディープラーニングアルゴリズム | 
+| Neural Collaborative Filtering (NCF) | [Python CPU / Python GPU](examples/00_quick_start/ncf_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバックの性能を強化したディープラーニングアルゴリズム | 
 | Neural Recommendation with Personalized Attention (NPA)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/npa_MIND.ipynb) | コンテンツベース フィルタリング | パーソナライズされたアテンション ネットワークを持つニューラル レコメンデーション アルゴリズム |
 | Neural Recommendation with Multi-Head Self-Attention (NRMS)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/nrms_MIND.ipynbb) | コンテンツベース フィルタリング | マルチヘッド 自己アテンション を伴うニューラル レコメンデーション アルゴリズム |
 | Next Item Recommendation (NextItNet) | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | 連続パターンのキャプチャを目的とした拡張畳み込みと残差ネットワークに基づくアルゴリズム |
-| Restricted Boltzmann Machines (RBM) | [Python CPU / Python GPU](notebooks/00_quick_start/rbm_movielens.ipynb) | 協調フィルタリング | 明示的または暗黙的なフィードバックのための基礎となる確率分布を学習するためのニューラルネットワークベースのアルゴリズム | 
-| Riemannian Low-rank Matrix Completion (RLRMC)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/rlrmc_movielens.ipynb) | 協調フィルタリング | 低メモリ消費量に最適化されたリーマン共役勾配法を使用した行列因子アルゴリズム |
-| Simple Algorithm for Recommendation (SAR)<sup>*</sup> | [Python CPU](notebooks/00_quick_start/sar_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバック データセット用の類似性ベースのアルゴリズム |
+| Restricted Boltzmann Machines (RBM) | [Python CPU / Python GPU](examples/00_quick_start/rbm_movielens.ipynb) | 協調フィルタリング | 明示的または暗黙的なフィードバックのための基礎となる確率分布を学習するためのニューラルネットワークベースのアルゴリズム | 
+| Riemannian Low-rank Matrix Completion (RLRMC)<sup>*</sup> | [Python CPU](examples/00_quick_start/rlrmc_movielens.ipynb) | 協調フィルタリング | 低メモリ消費量に最適化されたリーマン共役勾配法を使用した行列因子アルゴリズム |
+| Simple Algorithm for Recommendation (SAR)<sup>*</sup> | [Python CPU](examples/00_quick_start/sar_movielens.ipynb) | 協調フィルタリング | 暗黙的なフィードバック データセット用の類似性ベースのアルゴリズム |
 | Short-term and Long-term preference Integrated Recommender (SLi-Rec)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | アテンション メカニズム、時間対応コントローラ、コンテンツ対応コントローラを使用して、長期的なユーザー設定と短期的なユーザー設定の両方をキャプチャすることを目的とした順序ベースのアルゴリズム |
 | Standard VAE | [Python CPU / Python GPU](examples/02_model_collaborative_filtering/standard_vae_deep_dive.ipynb) | 協調フィルタリング | ユーザー/項目の相互作用を予測するための生成モデル |
-| Surprise/Singular Value Decomposition (SVD) | [Python CPU](notebooks/02_model/surprise_svd_deep_dive.ipynb) | 協調フィルタリング | それほど大きくないデータセット内の明示的な評価フィードバックを予測するための行列因子化アルゴリズム | 
+| Surprise/Singular Value Decomposition (SVD) | [Python CPU](examples/02_model_collaborative_filtering/surprise_svd_deep_dive.ipynb) | 協調フィルタリング | それほど大きくないデータセット内の明示的な評価フィードバックを予測するための行列因子化アルゴリズム | 
 | Term Frequency - Inverse Document Frequency (TF-IDF) | [Python CPU](examples/00_quick_start/tfidf_covid.ipynb) | コンテンツベース フィルタリング | テキスト データセットを使用したコンテンツ ベースのレコメンデーション事項に対する単純な類似性ベースのアルゴリズム |
-| Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](notebooks/02_model/vowpal_wabbit_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザーのフィーチャー/コンテキストが絶えず変化するシナリオに最適な高速オンライン学習アルゴリズム |
-| Wide and Deep | [Python CPU / Python GPU](notebooks/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | フィーチャの相互作用を記憶し、ユーザーのフィーチャーを一般化できるディープラーニング アルゴリズム |
+| Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](examples/02_model_content_based_filtering/vowpal_wabbit_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザーのフィーチャー/コンテキストが絶えず変化するシナリオに最適な高速オンライン学習アルゴリズム |
+| Wide and Deep | [Python CPU / Python GPU](examples/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | フィーチャの相互作用を記憶し、ユーザーのフィーチャーを一般化できるディープラーニング アルゴリズム |
 | Wide and Deep | [Python CPU / Python GPU](examples/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | 変数の相互作用を記憶し、ユーザー変数を一般化できるディープラーニング アルゴリズム |
 | xLearn/Factorization Machine (FM) & Field-Aware FM (FFM) | [Python CPU](examples/02_model_hybrid/fm_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザー/項目変数を備えたラベルを予測する高速でメモリ効率の高いアルゴリズム |
 
