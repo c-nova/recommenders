@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -8,10 +11,7 @@ from reco_utils.common.constants import (
     DEFAULT_RATING_COL,
     DEFAULT_TIMESTAMP_COL,
 )
-
-from reco_utils.dataset.python_splitters import (
-    python_chrono_split,
-)
+from reco_utils.dataset.python_splitters import python_chrono_split
 
 # ncf data generation
 @pytest.fixture(scope="module")
@@ -33,8 +33,7 @@ def python_dataset_ncf(test_specs_ncf):
     def random_date_generator(start_date, range_in_days):
         """Helper function to generate random timestamps.
 
-        Reference: https://stackoverflow.com/questions/41006182/generate-random-dates-within-a
-        -range-in-numpy
+        Reference: https://stackoverflow.com/questions/41006182/generate-random-dates-within-a-range-in-numpy
         """
         days_to_add = np.arange(0, range_in_days)
         random_dates = []

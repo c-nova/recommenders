@@ -2,52 +2,50 @@
 # Licensed under the MIT License.
 
 import os
-from urllib.request import urlretrieve
 import logging
+import requests
+import math
+import zipfile
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from tqdm import tqdm
 
-
 log = logging.getLogger(__name__)
-
-
-class TqdmUpTo(tqdm):
-    """Wrapper class for the progress bar tqdm to get `update_to(n)` functionality"""
-
-    def update_to(self, b=1, bsize=1, tsize=None):
-        """A progress bar showing how much is left to finish the operation
-        
-        Args:
-            b (int): Number of blocks transferred so far.
-            bsize (int): Size of each block (in tqdm units).
-            tsize (int): Total size (in tqdm units). 
-        """
-        if tsize is not None:
-            self.total = tsize
-        self.update(b * bsize - self.n)  # will also set self.n = b * bsize
 
 
 def maybe_download(url, filename=None, work_directory=".", expected_bytes=None):
     """Download a file if it is not already downloaded.
-    
+
     Args:
         filename (str): File name.
         work_directory (str): Working directory.
         url (str): URL of the file to download.
         expected_bytes (int): Expected file size in bytes.
-
+        
     Returns:
         str: File path of the file downloaded.
     """
     if filename is None:
         filename = url.split("/")[-1]
+    os.makedirs(work_directory, exist_ok=True)
     filepath = os.path.join(work_directory, filename)
     if not os.path.exists(filepath):
-        with TqdmUpTo(unit="B", unit_scale=True) as t:
-            filepath, _ = urlretrieve(url, filepath, reporthook=t.update_to)
+
+        r = requests.get(url, stream=True)
+        total_size = int(r.headers.get("content-length", 0))
+        block_size = 1024
+        num_iterables = math.ceil(total_size / block_size)
+
+        with open(filepath, "wb") as file:
+            for data in tqdm(
+                r.iter_content(block_size),
+                total=num_iterables,
+                unit="KB",
+                unit_scale=True,
+            ):
+                file.write(data)
     else:
-        log.debug("File {} already downloaded".format(filepath))
+        log.info("File {} already downloaded".format(filepath))
     if expected_bytes is not None:
         statinfo = os.stat(filepath)
         if statinfo.st_size != expected_bytes:
@@ -83,4 +81,17 @@ def download_path(path=None):
         path = os.path.realpath(path)
         yield path
 
-    
+
+def unzip_file(zip_src, dst_dir, clean_zip_file=True):
+    """Unzip a file
+
+    Args:
+        zip_src (str): Zip file.
+        dst_dir (str): Destination folder.
+        clean_zip_file (bool): Whether or not to clean the zip file.
+    """
+    fz = zipfile.ZipFile(zip_src, "r")
+    for file in fz.namelist():
+        fz.extract(file, dst_dir)
+    if clean_zip_file:
+        os.remove(zip_src)

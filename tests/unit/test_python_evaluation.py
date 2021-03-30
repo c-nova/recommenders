@@ -35,10 +35,8 @@ TOL = 0.0001
 def rating_true():
     return pd.DataFrame(
         {
-            DEFAULT_USER_COL: [1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            DEFAULT_USER_COL: [1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1,],
             DEFAULT_ITEM_COL: [
-                1,
-                2,
                 3,
                 1,
                 4,
@@ -55,8 +53,10 @@ def rating_true():
                 12,
                 13,
                 14,
+                1,
+                2,
             ],
-            DEFAULT_RATING_COL: [5, 4, 3, 5, 5, 3, 3, 1, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1],
+            DEFAULT_RATING_COL: [3, 5, 5, 3, 3, 1, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1, 5, 4,],
         }
     )
 
@@ -65,10 +65,8 @@ def rating_true():
 def rating_pred():
     return pd.DataFrame(
         {
-            DEFAULT_USER_COL: [1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            DEFAULT_USER_COL: [1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1,],
             DEFAULT_ITEM_COL: [
-                3,
-                10,
                 12,
                 10,
                 3,
@@ -85,10 +83,10 @@ def rating_pred():
                 2,
                 11,
                 14,
+                3,
+                10,
             ],
             DEFAULT_PREDICTION_COL: [
-                14,
-                13,
                 12,
                 14,
                 13,
@@ -105,8 +103,10 @@ def rating_pred():
                 7,
                 6,
                 5,
+                14,
+                13,
             ],
-            DEFAULT_RATING_COL: [5, 4, 3, 5, 5, 3, 3, 1, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1],
+            DEFAULT_RATING_COL: [3, 5, 5, 3, 3, 1, 5, 5, 5, 4, 4, 3, 3, 3, 2, 1, 5, 4,],
         }
     )
 
@@ -115,11 +115,9 @@ def rating_pred():
 def rating_nohit():
     return pd.DataFrame(
         {
-            DEFAULT_USER_COL: [1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            DEFAULT_USER_COL: [1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1,],
             DEFAULT_ITEM_COL: [100] * 18,
             DEFAULT_PREDICTION_COL: [
-                14,
-                13,
                 12,
                 14,
                 13,
@@ -136,6 +134,8 @@ def rating_nohit():
                 7,
                 6,
                 5,
+                14,
+                13,
             ],
         }
     )
@@ -393,14 +393,22 @@ def test_python_errors(rating_true, rating_pred):
         rmse(rating_true, rating_true, col_user="not_user")
 
     with pytest.raises(ValueError):
-        mae(rating_pred, rating_pred, col_rating=DEFAULT_PREDICTION_COL, col_user="not_user")
+        mae(
+            rating_pred,
+            rating_pred,
+            col_rating=DEFAULT_PREDICTION_COL,
+            col_user="not_user",
+        )
 
     with pytest.raises(ValueError):
         rsquared(rating_true, rating_pred, col_item="not_item")
 
     with pytest.raises(ValueError):
         exp_var(
-            rating_pred, rating_pred, col_rating=DEFAULT_PREDICTION_COL, col_item="not_item"
+            rating_pred,
+            rating_pred,
+            col_rating=DEFAULT_PREDICTION_COL,
+            col_item="not_item",
         )
 
     with pytest.raises(ValueError):
@@ -414,5 +422,8 @@ def test_python_errors(rating_true, rating_pred):
 
     with pytest.raises(ValueError):
         map_at_k(
-            rating_pred, rating_pred, col_rating=DEFAULT_PREDICTION_COL, col_user="not_user"
+            rating_pred,
+            rating_pred,
+            col_rating=DEFAULT_PREDICTION_COL,
+            col_user="not_user",
         )

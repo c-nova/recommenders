@@ -16,12 +16,7 @@ import pytest
 from sklearn.model_selection import train_test_split
 from tempfile import TemporaryDirectory
 from tests.notebooks_common import path_notebooks
-from reco_utils.common.general_utils import get_number_processors, get_physical_memory
-
-try:
-    from pyspark.sql import SparkSession
-except ImportError:
-    pass  # so the environment without spark doesn't break
+from reco_utils.common.spark_utils import start_or_get_spark
 
 
 @pytest.fixture
@@ -50,21 +45,11 @@ def spark(app_name="Sample", url="local[*]"):
     Returns:
         SparkSession: new Spark session
     """
-    n_cores = get_number_processors()
-    physical_mem = get_physical_memory()
-    return (
-        SparkSession.builder.appName(app_name)
-        .master(url)
-        .config("spark.driver.cores", 1)
-        .config("spark.driver.maxResultSize", "1g")
-        .config("spark.driver.memory", "{:d}g".format(int(physical_mem * 0.2)))
-        .config("spark.executor.cores", n_cores - 1)
-        .config("spark.executor.instances", 1)
-        .config("spark.executor.memory", "{:d}g".format(int(physical_mem * 0.6)))
-        .config("spark.local.dir", "/mnt")
-        .config("spark.sql.shuffle.partitions", 1)
-        .getOrCreate()
-    )
+
+    config = {"spark.local.dir": "/mnt", "spark.sql.shuffle.partitions": 1}
+    spark = start_or_get_spark(app_name=app_name, url=url, config=config)
+    yield spark
+    spark.stop()
 
 
 @pytest.fixture(scope="module")
@@ -199,15 +184,11 @@ def notebooks():
 
     # Path for the notebooks
     paths = {
-        "template": os.path.join(
-            folder_notebooks, "template.ipynb"
-        ),
+        "template": os.path.join(folder_notebooks, "template.ipynb"),
         "sar_single_node": os.path.join(
             folder_notebooks, "00_quick_start", "sar_movielens.ipynb"
         ),
-        "ncf": os.path.join(
-            folder_notebooks, "00_quick_start", "ncf_movielens.ipynb"
-        ),
+        "ncf": os.path.join(folder_notebooks, "00_quick_start", "ncf_movielens.ipynb"),
         "als_pyspark": os.path.join(
             folder_notebooks, "00_quick_start", "als_movielens.ipynb"
         ),
@@ -218,7 +199,7 @@ def notebooks():
             folder_notebooks, "00_quick_start", "xdeepfm_criteo.ipynb"
         ),
         "dkn_quickstart": os.path.join(
-            folder_notebooks, "00_quick_start", "dkn_synthetic.ipynb"
+            folder_notebooks, "00_quick_start", "dkn_MIND.ipynb"
         ),
         "lightgbm_quickstart": os.path.join(
             folder_notebooks, "00_quick_start", "lightgbm_tinycriteo.ipynb"
@@ -226,41 +207,84 @@ def notebooks():
         "wide_deep": os.path.join(
             folder_notebooks, "00_quick_start", "wide_deep_movielens.ipynb"
         ),
-        "data_split": os.path.join(
-            folder_notebooks, "01_prepare_data", "data_split.ipynb"
+        "slirec_quickstart": os.path.join(
+            folder_notebooks, "00_quick_start", "sequential_recsys_amazondataset.ipynb"
         ),
-        "als_deep_dive": os.path.join(
-            folder_notebooks, "02_model", "als_deep_dive.ipynb"
+        "nrms_quickstart": os.path.join(
+            folder_notebooks, "00_quick_start", "nrms_MIND.ipynb"
         ),
-        "surprise_svd_deep_dive": os.path.join(
-            folder_notebooks, "02_model", "surprise_svd_deep_dive.ipynb"
+        "naml_quickstart": os.path.join(
+            folder_notebooks, "00_quick_start", "naml_MIND.ipynb"
         ),
-        "baseline_deep_dive": os.path.join(
-            folder_notebooks, "02_model", "baseline_deep_dive.ipynb"
+        "lstur_quickstart": os.path.join(
+            folder_notebooks, "00_quick_start", "lstur_MIND.ipynb"
         ),
-        "ncf_deep_dive": os.path.join(
-            folder_notebooks, "02_model", "ncf_deep_dive.ipynb"
-        ),
-        "sar_deep_dive": os.path.join(
-            folder_notebooks, "02_model", "sar_deep_dive.ipynb"
-        ),
-        "vowpal_wabbit_deep_dive": os.path.join(
-            folder_notebooks, "02_model", "vowpal_wabbit_deep_dive.ipynb"
-        ),
-        "mmlspark_lightgbm_criteo": os.path.join(
-            folder_notebooks, "02_model", "mmlspark_lightgbm_criteo.ipynb"
-        ),
-        "evaluation": os.path.join(
-            folder_notebooks, "03_evaluate", "evaluation.ipynb"
-        ),
-        "spark_tuning": os.path.join(
-            folder_notebooks, "04_model_select_and_optimize", "tuning_spark_als.ipynb"
+        "npa_quickstart": os.path.join(
+            folder_notebooks, "00_quick_start", "npa_MIND.ipynb"
         ),
         "rlrmc_quickstart": os.path.join(
             folder_notebooks, "00_quick_start", "rlrmc_movielens.ipynb"
         ),
+        "geoimc_quickstart": os.path.join(
+            folder_notebooks, "00_quick_start", "geoimc_movielens.ipynb"
+        ),
+        "data_split": os.path.join(
+            folder_notebooks, "01_prepare_data", "data_split.ipynb"
+        ),
+        "wikidata_knowledge_graph": os.path.join(
+            folder_notebooks, "01_prepare_data", "wikidata_knowledge_graph.ipynb"
+        ),
+        "mind_utils": os.path.join(
+            folder_notebooks, "01_prepare_data", "mind_utils.ipynb"
+        ),
+        "als_deep_dive": os.path.join(
+            folder_notebooks, "02_model_collaborative_filtering", "als_deep_dive.ipynb"
+        ),
+        "surprise_svd_deep_dive": os.path.join(
+            folder_notebooks,
+            "02_model_collaborative_filtering",
+            "surprise_svd_deep_dive.ipynb",
+        ),
+        "baseline_deep_dive": os.path.join(
+            folder_notebooks,
+            "02_model_collaborative_filtering",
+            "baseline_deep_dive.ipynb",
+        ),
+        "lightgcn_deep_dive": os.path.join(
+            folder_notebooks,
+            "02_model_collaborative_filtering",
+            "lightgcn_deep_dive.ipynb",
+        ),
+        "ncf_deep_dive": os.path.join(
+            folder_notebooks, "02_model_hybrid", "ncf_deep_dive.ipynb"
+        ),
+        "sar_deep_dive": os.path.join(
+            folder_notebooks, "02_model_collaborative_filtering", "sar_deep_dive.ipynb"
+        ),
+        "vowpal_wabbit_deep_dive": os.path.join(
+            folder_notebooks,
+            "02_model_content_based_filtering",
+            "vowpal_wabbit_deep_dive.ipynb",
+        ),
+        "mmlspark_lightgbm_criteo": os.path.join(
+            folder_notebooks,
+            "02_model_content_based_filtering",
+            "mmlspark_lightgbm_criteo.ipynb",
+        ),
+        "cornac_bpr_deep_dive": os.path.join(
+            folder_notebooks,
+            "02_model_collaborative_filtering",
+            "cornac_bpr_deep_dive.ipynb",
+        ),
+        "xlearn_fm_deep_dive": os.path.join(
+            folder_notebooks, "02_model_hybrid", "fm_deep_dive.ipynb"
+        ),
+        "evaluation": os.path.join(folder_notebooks, "03_evaluate", "evaluation.ipynb"),
+        "spark_tuning": os.path.join(
+            folder_notebooks, "04_model_select_and_optimize", "tuning_spark_als.ipynb"
+        ),
         "nni_tuning_svd": os.path.join(
             folder_notebooks, "04_model_select_and_optimize", "nni_surprise_svd.ipynb"
-        )
+        ),
     }
     return paths

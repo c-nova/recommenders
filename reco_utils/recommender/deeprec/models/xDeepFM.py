@@ -3,12 +3,22 @@
 
 import numpy as np
 import tensorflow as tf
-from .base_model import BaseModel
+
+from reco_utils.recommender.deeprec.models.base_model import BaseModel
+
 
 __all__ = ["XDeepFMModel"]
 
 
 class XDeepFMModel(BaseModel):
+    """xDeepFM model
+
+    J. Lian, X. Zhou, F. Zhang, Z. Chen, X. Xie, G. Sun, "xDeepFM: Combining Explicit 
+    and Implicit Feature Interactions for Recommender Systems", in Proceedings of the 
+    24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining, 
+    KDD 2018, London, 2018.
+    """
+
     def _build_graph(self):
         """The main function to create xdeepfm's logic.
         

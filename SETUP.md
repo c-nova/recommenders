@@ -4,20 +4,24 @@
 
 * ローカル (Linux, MacOS または Windows) または [DSVM](https://azure.microsoft.com/en-us/services/virtual-machines/data-science-virtual-machines/) (Linux または Windows)
 * [Azure Databricks](https://azure.microsoft.com/en-us/services/databricks/)
+* Docker コンテナ
 
 ## 目次
 
-* [コンピュート環境](#コンピュート環境)
-* [ローカル または DSVM 用のセットアップ ガイド](#ローカル-または-DSVM-用のセットアップ-ガイド)
-  * [要件](#要件)
-  * [依存関係のセットアップ](#依存関係のセットアップ)
-  * [Jupyter 内でカーネルとして conda 環境を登録する](#Jupyter-内でカーネルとして-conda-環境を登録する)
-  * [DSVM でのトラブルシューティング](#DSVM-でのトラブルシューティング)
-* [Azure Databricks 用のセットアップ ガイド](#Azure-Databricks-用のセットアップ-ガイド)
-  * [Azure Databricks の要件](#requirements-of-azure-databricks)
-  * [リポジトリのインストール](#リポジトリのインストール)
-  * [Azure Databricks でのインストールにおけるトラブルシューティング](#Azure-Databricks-でのインストールにおけるトラブルシューティング)
-* [Azure Databricks における運用化の準備](#Azure-Databricks-における運用化の準備)
+  - [コンピュート環境](#コンピュート環境)
+  - [ローカル または DSVM 用のセットアップ ガイド](#ローカル-または-DSVM-用のセットアップ-ガイド)
+    - [要件](#要件)
+    - [依存関係のセットアップ](#依存関係のセットアップ)
+    - [Jupyter 内でカーネルとして conda 環境を登録する](#Jupyter-内でカーネルとして-conda-環境を登録する)
+    - [DSVM でのトラブルシューティング](#DSVM-でのトラブルシューティング)
+  - [Azure Databricks 用のセットアップ ガイド](#Azure-Databricks-用のセットアップ-ガイド)
+    - [Azure Databricks の要件](#requirements-of-azure-databricks)
+    - [リポジトリのインストール](#リポジトリのインストール)
+    - [インストールの確認](#インストールの確認)
+    - [Azure Databricks でのインストールにおけるトラブルシューティング](#Azure-Databricks-でのインストールにおけるトラブルシューティング)
+    - [Azure Databricks における運用化の準備](#Azure-Databricks-における運用化の準備)
+  - [PIP経由でユーティリティをインストールする](#PIP経由でユーティリティをインストールする)
+  - [Docker のセットアップガイド](#Docker-のセットアップガイド)
 
 ## コンピュート環境
 
@@ -43,13 +47,30 @@ conda update conda -n root
 conda update anaconda        # use 'conda install anaconda' if the package is not installed
 ```
 
-私たちは conda 環境用 yaml ファイルを生成するスクリプト [generate_conda_file.py](scripts/generate_conda_file.py)を提供しています。これを使用することで、すべての正しい依存関係をと、Python バージョン 3.6 を使用してターゲット環境を作成することできます。
+私たちは conda 環境用 yaml ファイルを生成するスクリプト [generate_conda_file.py](tools/generate_conda_file.py)を提供しています。これを使用することで、すべての正しい依存関係をと、Python バージョン 3.6 を使用してターゲット環境を作成することできます。
 
-仮にローカルシステムにクローンされたリポジトリが `Recommenders` であった場合、**デフォルト (Python CPU) の環境** をインストールする場合には以下のように実行します:
+**注** `xlearn` パッケージは `cmake` に依存しています。`xlearn` 関連のノートブックまたはスクリプトを使用している場合は、`cmake` がシステムにインストールされていることを確認してください。Linux にインストールする最も簡単な方法は apt-get を利用して次のように実行します: `sudo apt-get install -y build-essential cmake`。ソースから `cmake` をインストールするための詳細な手順は、[こちら](https://cmake.org/install/)をご覧ください。
+
+**注** PySpark v2.4.x には Java バージョン 8 が必要です。
+
+<details> 
+<summary><strong><em>MacOS に Java 8 をインストールする</em></strong></summary>
+  
+MacOS に Java 8 をインストールするは [asdf](https://github.com/halcyon/asdf-java) を使用します：
+
+    brew install asdf
+    asdf plugin add Java
+    asdf install java adoptopenjdk-8.0.265+1
+    asdf global java adoptopenjdk-8.0.265+1
+    . ~/.asdf/plugins/java/set-java-home.zsh
+
+</details>
+
+ローカルシステムにクローンされたリポジトリが `Recommenders` として、**デフォルト (Python CPU) の環境** をインストールする場合には以下のように実行します:
 
     cd Recommenders
-    python scripts/generate_conda_file.py
-    conda env create -f reco_base.yaml 
+    python tools/generate_conda_file.py
+    conda env create -f reco_base.yaml
 
 環境名は `-n` フラグを使用することで指定することが可能です。
 
@@ -61,8 +82,8 @@ Python GPU および PySpark 環境のインストールについては、以下
 GPU マシンを持っている場合には、以下のように Python GPU 環境をインストールすることが可能です:
 
     cd Recommenders
-    python scripts/generate_conda_file.py --gpu
-    conda env create -f reco_gpu.yaml 
+    python tools/generate_conda_file.py --gpu
+    conda env create -f reco_gpu.yaml
 
 </details>
 
@@ -72,12 +93,81 @@ GPU マシンを持っている場合には、以下のように Python GPU 環�
 PySpark 環境のインストールは以下のように指定します:
 
     cd Recommenders
-    python scripts/generate_conda_file.py --pyspark
+    python tools/generate_conda_file.py --pyspark
     conda env create -f reco_pyspark.yaml
 
-さらに、特定のバージョンの spark をテストする場合は、--pyspark-version 引数を渡します:
+> さらに、特定のバージョンの Spark をテストする場合は、--pyspark-version 引数を渡して実行できます：
+>
+>     python tools/generate_conda_file.py --pyspark-version 2.4.5
 
-    python scripts/generate_conda_file.py --pyspark-version 2.4.0
+次に、環境変数 `PYSPARK_PYTHON` と `PYSPARK_DRIVER_PYTHON` をセットし、conda python 実行可能ファイルを指定する必要があります。
+
+詳細を表示するには、次のメニューをクリックします。
+<details>
+<summary><strong><em>Linux または MacOS 上で PySpark 環境変数を設定する</em></strong></summary>
+
+これらの環境変数を設定する環境がアクティブになるたびにこれらの変数を設定するには、この[ガイド](https://conda.io/docs/user-guide/tasks/manage-environments.html#macos-and-linux)の手順に従います。
+
+まず、インストールされた `reco_pyspark` 環境のパスを取得します：
+
+    RECO_ENV=$(conda env list | grep reco_pyspark | awk '{print $NF}')
+    mkdir -p $RECO_ENV/etc/conda/activate.d
+    mkdir -p $RECO_ENV/etc/conda/deactivate.d
+
+また、Spark がインストールされている場所を見つけ、`SPARK_HOME` 変数にセットします。DSVMの場合には `SPARK_HOME=/dsvm/tools/spark/current` と設定します。
+
+次に、`$RECO_ENV/etc/conda/activate.d/env_vars.sh` ファイルを作成し、次のように追加します：
+
+```bash
+#!/bin/sh
+RECO_ENV=$(conda env list | grep reco_pyspark | awk '{print $NF}')
+export PYSPARK_PYTHON=$RECO_ENV/bin/python
+export PYSPARK_DRIVER_PYTHON=$RECO_ENV/bin/python
+export SPARK_HOME=/dsvm/tools/spark/current
+```
+
+This will export the variables every time we do `conda activate reco_pyspark`. To unset these variables when we deactivate the environment, create the file `$RECO_ENV/etc/conda/deactivate.d/env_vars.sh` and add:
+
+これにより、`conda activate reco_pyspark` が実行されるたびに変数がエクスポートされます。環境を非アクティブ化するときにこれらの変数を設定解除するには、`$RECO_ENV/etc/conda/deactivate.d/env_vars.sh` ファイルを作成し、次のように追加します：
+
+```bash
+#!/bin/sh
+unset PYSPARK_PYTHON
+unset PYSPARK_DRIVER_PYTHON
+```
+
+</details>
+
+<details><summary><strong><em>Windows 上で PySpark 環境変数を設定する</em></strong></summary>
+
+これらの環境変数を設定する環境がアクティブになるたびにこれらの変数を設定するには、この[ガイド](https://conda.io/docs/user-guide/tasks/manage-environments.html#windows)の手順に従います。
+
+まず、インストールされた `reco_pyspark` 環境のパスを取得します：
+
+    for /f "delims=" %A in ('conda env list ^| grep reco_pyspark ^| awk "{print $NF}"') do set "RECO_ENV=%A"
+
+次に、`%RECO_ENV%\etc\conda\activate.d\env_vars.bat` ファイルを作成し、次のように追加します：
+
+    @echo off
+    for /f "delims=" %%A in ('conda env list ^| grep reco_pyspark ^| awk "{print $NF}"') do set "RECO_ENV=%%A"
+    set PYSPARK_PYTHON=%RECO_ENV%\python.exe
+    set PYSPARK_DRIVER_PYTHON=%RECO_ENV%\python.exe
+    set SPARK_HOME_BACKUP=%SPARK_HOME%
+    set SPARK_HOME=
+    set PYTHONPATH_BACKUP=%PYTHONPATH%
+    set PYTHONPATH=
+
+これにより、`conda activate reco_pyspark` が実行されるたびに変数がエクスポートされます。環境を非アクティブ化するときにこれらの変数を設定解除するには、`%RECO_ENV%\etc\conda\deactivate.d\env_vars.bat` ファイルを作成し、次のように追加します：
+
+    @echo off
+    set PYSPARK_PYTHON=
+    set PYSPARK_DRIVER_PYTHON=
+    set SPARK_HOME=%SPARK_HOME_BACKUP%
+    set SPARK_HOME_BACKUP=
+    set PYTHONPATH=%PYTHONPATH_BACKUP%
+    set PYTHONPATH_BACKUP=
+
+</details>
 
 </details>
 
@@ -88,68 +178,12 @@ PySpark 環境のインストールは以下のように指定します:
 この環境をインストールするには以下のように実行します:
 
     cd Recommenders
-    python scripts/generate_conda_file.py --gpu --pyspark
+    python tools/generate_conda_file.py --gpu --pyspark
     conda env create -f reco_full.yaml
 
+次に、環境変数 `PYSPARK_PYTHON` と `PYSPARK_DRIVER_PYTHON` をセットし、conda python 実行可能ファイルを指定する必要があります。
+これらの変数の設定方法の詳細については、 **PySpark 環境**のセットアップ セクションを参照してください。コマンド内の `reco_pyspark` 文字列は `reco_full` に変更して実行する必要があります。
 </details>
-
-
-> **注** - PySpark 環境 (`reco_pyspark` および `reco_full`) においては、`PYSPARK_PYTHON` と `PYSPARK_DRIVER_PYTHON` の環境変数を作成し、conda の python 実行ファイルを指定する必要があります。
->
-> 詳細を確認するには以下のメニューをクリックします:
->
-> <details>
-> <summary><strong><em>Linux または MacOS</em></strong></summary>
->
-> これらの環境変数を環境がアクティベートされる度にセットするには、この[ガイド](https://conda.io/docs/user-guide/tasks/manage-environments.html#macos-and-linux)のステップに従う必要があります。
-インストールされた環境が `/anaconda/envs/reco_pyspark` だった場合には、`/anaconda/envs/reco_pyspark/etc/conda/activate.d/env_vars.sh`ファイルを作成し、以下の内容を追記します:
->
->     ```bash
->     #!/bin/sh
->     export PYSPARK_PYTHON=/anaconda/envs/reco_pyspark/bin/python
->     export PYSPARK_DRIVER_PYTHON=/anaconda/envs/reco_pyspark/bin/python
->     export SPARK_HOME_BACKUP=$SPARK_HOME
->     unset SPARK_HOME
->     ```
->
-> これにより、`conda activate reco_pyspark` が実行される度に環境変数のエクスポートが実行されます。
-> 非アクティブ化した際にこれらの変数を無効化するには、`/anaconda/envs/reco_pyspark/etc/conda/deactivate.d/env_vars.sh`ファイルを作成し、以下の内容を追記します:
->
->     ```bash
->     #!/bin/sh
->     unset PYSPARK_PYTHON
->     unset PYSPARK_DRIVER_PYTHON
->     export SPARK_HOME=$SPARK_HOME_BACKUP
->     unset SPARK_HOME_BACKUP
->     ```
-> 
-> </details>
->
-> <details><summary><strong><em>Windows</em></strong></summary>
-> 
-> これらの環境変数を環境がアクティベートされる度にセットするには、この[ガイド](https://conda.io/docs/user-guide/tasks/manage-environments.html#windows)のステップに従う必要があります。
-インストールされた環境が `c:\anaconda\envs\reco_pyspark` だった場合には、`c:\anaconda\envs\reco_pyspark\etc\conda\activate.d\env_vars.bat`ファイルを作成し、以下の内容を追記します:
-> 
->     @echo off
->     set PYSPARK_PYTHON=c:\anaconda\envs\reco_pyspark\python.exe
->     set PYSPARK_DRIVER_PYTHON=c:\anaconda\envs\reco_pyspark\python.exe
->     set SPARK_HOME_BACKUP=%SPARK_HOME%
->     set SPARK_HOME=
->     set PYTHONPATH_BACKUP=%PYTHONPATH%
->     set PYTHONPATH=
-> 
-> これにより、`conda activate reco_pyspark` が実行される度に環境変数のエクスポートが実行されます。
-> 非アクティブ化した際にこれらの変数を無効化するには、`c:\anaconda\envs\reco_pyspark\etc\conda\deactivate.d\env_vars.bat`ファイルを作成し、以下の内容を追記します:
-> 
->     @echo off
->     set PYSPARK_PYTHON=
->     set PYSPARK_DRIVER_PYTHON=
->     set SPARK_HOME=%SPARK_HOME_BACKUP%
->     set SPARK_HOME_BACKUP=
->     set PYTHONPATH=%PYTHONPATH_BACKUP%
->     set PYTHONPATH_BACKUP=
-> 
-> </details>
 
 
 ### Jupyter 内でカーネルとして conda 環境を登録する
@@ -164,6 +198,7 @@ DSVM を使用している場合には、Web ブラウザで `https://your-vm-ip
 ### DSVM でのトラブルシューティング
 
 * マシンの Spark バージョンが conda ファイルのバージョンと同じでない場合、問題が発生する可能性があることがわかりました。`--pyspark-version` オプションを使用することでこの問題を回避することが可能です。
+
 * 単一のローカル ノードで Spark を実行すると、一時ファイルがユーザーのホーム ディレクトリに書き込まれるため、ディスク領域が不足する可能性があります。DSVM でこれを回避するためには、DSVM に追加のディスクを接続し、Spark 構成を変更します。これを行うには、`/dsvm/tools/spark/current/conf/spark-env.sh` のファイルに以下の内容を追記します。
 
 ```{shell}
@@ -172,17 +207,33 @@ SPARK_WORKER_DIR="/mnt"
 SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true, -Dspark.worker.cleanup.appDataTtl=3600, -Dspark.worker.cleanup.interval=300, -Dspark.storage.cleanupFilesAfterExecutorExit=true"
 ```
 
+* もう 1 つの問題の原因は、変数 `SPARK_HOME` が正しく設定されていない場合です。Azure DSVM では、`SPARK_HOME` が `/dsvm/tools/spark/current` 内で指定されている必要があります。
+
+* Java 11 環境では、ノートブックの実行時にエラーが発生することがあります。Java 8 に変更するには以下の内容を実行します:
+
+```
+sudo apt install openjdk-8-jdk
+sudo update-alternatives --config java
+```
+
+* DSVM で利用可能な現在の MMLSpark jar と、ライブラリで使用されている Jar との間に競合する可能性があります。その場合は、これらの jar を削除し、Maven または MMLSpark チームが提供する他のリポジトリからそれらをロードすることをお勧めします。
+
+```
+cd /dsvm/tools/spark/current/jars
+sudo rm -rf Azure_mmlspark-0.12.jar com.microsoft.cntk_cntk-2.4.jar com.microsoft.ml.lightgbm_lightgbmlib-2.0.120.jar
+```
+
 ## Azure Databricks 用のセットアップ ガイド
 
-### Azure Databricks の要件
+### 要件
 
-* Databricks のランタイム バージョンが 4.3 (Apache Spark 2.3.1, Scala 2.11) 以上
+* Databricks のランタイム バージョンが 4.3 (Apache Spark 2.3.1, Scala 2.11) 以上及び 5.5 (Apache Spark 2.4.3, Scala 2.11) 以下であること
 * Python 3
 
 ワークスペース内に Azure Databricks ワークスペースと Apache Spark クラスターを作成する方法の例については、[こちら](https://docs.microsoft.com/en-us/azure/azure-databricks/quickstart-create-databricks-workspace-portal) を参照してください。ディープラーニング モデルと GPU を使用するには、GPU 対応クラスターをセットアップします。このトピックの詳細については、[Azure Databricks ディープラーニング ガイド](https://docs.azuredatabricks.net/applications/deep-learning/index.html)を参照してください。  
 
-### リポジトリのインストール
-リポジトリを Databricks のライブラリとして手動でセットアップするか、[インストール スクリプト](scripts/databricks_install.py)を実行して設定します。どちらのオプションも、プロビジョニングされた Databricks ワークスペースとクラスターにアクセスでき、ライブラリをインストールするための適切なアクセス許可があることを前提としています。
+### 依存関係のセットアップ
+リポジトリを Databricks のライブラリとして手動でセットアップするか、[インストール スクリプト](tools/databricks_install.py)を実行して設定します。どちらのオプションも、プロビジョニングされた Databricks ワークスペースとクラスターにアクセスでき、ライブラリをインストールするための適切なアクセス許可があることを前提としています。
 
 <details>
 <summary><strong><em>クイック インストール</em></strong></summary>
@@ -193,7 +244,7 @@ SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true, -Dspark.worker.cleanup.a
 > * [Azure Databricks CLI (コマンドライン インターフェース)](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#install-the-cli)用の CLI 認証のセットアップ。[ここ](https://docs.azuredatabricks.net/user-guide/dev-tools/databricks-cli.html#set-up-authentication)でトークンの作成と認証の設定方法の詳細を確認してください（訳注：ここの方法を使用し、実際にポータル上で認証トークンの事前作成が必要です）。簡潔に言うと、次のコマンドを使用して環境をインストールおよび構成可能です。
 >
 >     ```{shell}
->     conda activate reco-pyspark
+>     conda activate reco_pyspark
 >     databricks configure --token
 >     ```
 >
@@ -207,23 +258,23 @@ SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true, -Dspark.worker.cleanup.a
 >        databricks clusters start --cluster-id <CLUSTER_ID>`
 >        ```
 
-インストール スクリプトには、さまざまな databricks-cli プロファイルを処理したり、mmlspark ライブラリのバージョンをインストールしたり、ライブラリを上書きしたり、クラスターを操作用に準備したりできるオプションが多数用意されています。すべてのオプションについては、以下を参照してください:
+インストール スクリプトには、さまざまな databricks-cli プロファイルを処理したり、mmlspark ライブラリのバージョンをインストールしたり、ライブラリを上書きしたり、クラスターを操作用に準備したりできるオプションが多数用意されています。すべてのオプションについては、以下を実行して参照してください:
 
 ```{shell}
-python scripts/databricks_install.py -h
+python tools/databricks_install.py -h
 ```
 
 databricks クラスターが *RUNNING* であることを確認したら、次のコマンドを使用してこのリポジトリ内のモジュールをインストールします。
 
 ```{shell}
 cd Recommenders
-python scripts/databricks_install.py <CLUSTER_ID>
+python tools/databricks_install.py <CLUSTER_ID>
 ```
 
-**注** 運用化のための[この](notebooks/05_operationalize/als_movie_o16n.ipynb)サンプル コードを実行する予定がある場合には、運用化のためにクラスターを準備する必要があります。これを行うには、スクリプトの実行に追加のオプションを追加します。<CLUSTER_ID> は前述の <CLUSTER_ID> と同じで、`databricks clusters list` を実行し、適切なクラスターを選択することで識別できます。
+**注** 運用化のための[この](examples/05_operationalize/als_movie_o16n.ipynb)サンプル コードを実行する予定がある場合には、運用化のためにクラスターを準備する必要があります。これを行うには、スクリプトの実行に追加のオプションを追加します。<CLUSTER_ID> は前述の <CLUSTER_ID> と同じで、`databricks clusters list` を実行し、適切なクラスターを選択することで識別できます。
 
 ```{shell}
-python ./scripts/databricks_install.py --prepare-o16n <CLUSTER_ID>
+python tools/databricks_install.py --prepare-o16n <CLUSTER_ID>
 ```
 
 詳細は以下を参照してください。
@@ -247,7 +298,7 @@ python ./scripts/databricks_install.py --prepare-o16n <CLUSTER_ID>
 5. ポップアップ ウィンドウには、ライブラリをインポートするオプションがあり、`(To import a library, such as a jar or egg, click here)`と表示されます。`click here` を選択します。
 6. 次の画面で、最初のメニューで `Upload Python Egg or PyPI` オプションを選択します。
 7. 次に、`Drop library egg here to upload` というテキストが含まれているボックスをクリックし、ファイルセレクタを使用して作成した `Recommenders.egg` ファイルを選択し、`Open` を選択します。
-8. `Create library` をクリックします。これにより、卵がアップロードされ、ワークスペースで使用できるようになります。
+8. `Create library` をクリックします。これにより、Eggファイルがアップロードされ、ワークスペースで使用できるようになります。
 9. 最後に、次のメニューで、ライブラリをクラスタにアタッチします。
 
 </details>
@@ -266,7 +317,7 @@ import reco_utils
 
 ## Azure Databricks における運用化の準備
 
-このリポジトリには、Azure Databricks を使用して最小二乗法を用いた行列因子化を利用したレコメンデーション モデルを推定し、事前に計算されたレコメンデーション アイテムを Azure Cosmos DB に書き込み、Cosmos DBからレコメンデーション アイテムを取得するリアルタイムスコアリングサービスを作成する方法が全て記載されたノートブックが含まれています。この [ノートブック](notebooks/05_operationalize/als_movie_o16n.ipynb)を実行するには、(前述のように) Recommenders リポジトリをライブラリとしてインストールする必要があり、 **かつ** いくつかの追加の依存関係をインストールする必要があります。*クイックインストール* 方法を使用すると、[インストールスクリプト](scripts/databricks_install.py)にいくつかの追加オプションを渡すだけで構成が可能です。
+このリポジトリには、Azure Databricks を使用して最小二乗法を用いた行列因子化を利用したレコメンデーション モデルを推定し、事前に計算されたレコメンデーション アイテムを Azure Cosmos DB に書き込み、Cosmos DBからレコメンデーション アイテムを取得するリアルタイムスコアリングサービスを作成する方法が全て記載されたノートブックが含まれています。この [ノートブック](examples/05_operationalize/als_movie_o16n.ipynb)を実行するには、(前述のように) Recommenders リポジトリをライブラリとしてインストールする必要があり、 **かつ** いくつかの追加の依存関係をインストールする必要があります。*クイックインストール* を使用すると、[インストールスクリプト](tools/databricks_install.py)にいくつかの追加オプションを渡すだけで構成が可能です。
 
 <details>
 <summary><strong><em>クイック インストール</em></strong></summary>
@@ -274,7 +325,7 @@ import reco_utils
 このオプションは、インストール スクリプトを使用してセットアップを行います。追加のオプションを使用してインストール スクリプトを実行するだけです。`Recommenders.egg` ライブラリをアップロードしてインストールするためにスクリプトを既に 1 回実行している場合は、`--overwrite` オプションを追加することもできます:
 
 ```{shell}
-python scripts/databricks_install.py --overwrite --prepare-o16n <CLUSTER_ID>
+python tools/databricks_install.py --overwrite --prepare-o16n <CLUSTER_ID>
 ```
 
 このスクリプトは、以下の *手動セットアップ* セクションで説明されているすべての手順を実行します。
@@ -296,7 +347,7 @@ PyPI からパッケージをインストールする方法の詳細について
 
 1. [適切な jar ファイル](https://search.maven.org/remotecontent?filepath=com/microsoft/azure/azure/azure-cosmosdb-spark_2.3.0_2.11/1.2.2/azure-cosmosdb-spark_2.3.0_2.11-1.2.2-uber.jar)を MAVEN からダウンロードしてください。**注** これは Spark バージョン '2.3.x' に適した jar であり、上記で詳しく説明した推奨の Azure Databricks ランタイムに適したバージョンです。
 2. jar をアップロードしてインストールします。
-   1. 「Azure Databrics」ワークスペースにログインする
+   1. `Azure Databrics`ワークスペースにログインする
    2. 左側の `Clusters` ボタンを選択します。
    3. ライブラリをインポートするクラスターを選択します。
    4. `Upload` と `Jar` オプションを選択し、その中に `Drop JAR here` というテキストが入っているボックスをクリックします。
@@ -305,3 +356,35 @@ PyPI からパッケージをインストールする方法の詳細について
    7. クラスタを再起動します。
 
 </details>
+
+## PIP経由でユーティリティをインストールする
+
+このリポジトリ内のユーティリティをメインディレクトリから簡単にインストールできるようにするために、[setup.py](setup.py) ファイルを提供しています。
+
+この場合でも、上記のように conda 環境をインストールする必要があります。必要な依存関係をインストールしたら、次のコマンドを使用して `reco_utils` を Python パッケージとしてインストールできます。
+
+    pip install -e .
+
+GitHub から直接インストールすることもできます。または特定のブランチからも同様です。
+
+    pip install -e git+https://github.com/microsoft/recommenders/#egg=pkg
+    pip install -e git+https://github.com/microsoft/recommenders/@staging#egg=pkg
+
+**注** - pip インストールでは、必要なパッケージの依存関係はインストールされず、conda は使用されているユーティリティの環境を設定するために上記のように使用されると推定します。
+
+## Docker のセットアップガイド
+
+[Dockerfile](tools/docker/Dockerfile) は、さまざまな環境のセットアップを簡素化するために、リポジトリのイメージを構築するために提供されます。システムに Docker エンジンがインストールされている必要があります。
+
+*注: Docker は Azure Data Science Virtual Machine では既定で利用可能です*
+
+さまざまな環境でイメージをビルドして実行する方法の詳細については、Docker の [README](tools/docker/README.md) のガイドラインを参照してください。
+
+以下は基本の CPU 環境で Docker イメージをビルドして実行するコマンドの例です。
+
+```{shell}
+DOCKER_BUILDKIT=1 docker build -t recommenders:cpu --build-arg ENV="cpu" .
+docker run -p 8888:8888 -d recommenders:cpu
+```
+
+実行後、Jupyter Notebook サーバーを http://localhost:8888 から開くことが可能です。

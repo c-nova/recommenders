@@ -2,9 +2,8 @@
 # Licensed under the MIT License.
 
 
-import tensorflow as tf
-import six
 import os
+import six
 from sklearn.metrics import (
     roc_auc_score,
     log_loss,
@@ -15,11 +14,16 @@ from sklearn.metrics import (
 import numpy as np
 import yaml
 import zipfile
+import json
+import pickle as pkl
+import tensorflow as tf
+
 from reco_utils.dataset.download_utils import maybe_download
 
 
 def flat_config(config):
     """Flat config loaded from a yaml file to a flat dict.
+    
     Args:
         config (dict): Configuration loaded from a yaml file.
 
@@ -36,6 +40,7 @@ def flat_config(config):
 
 def check_type(config):
     """Check that the config parameters are the correct type
+    
     Args:
         config (dict): Configuration dictionary.
 
@@ -47,6 +52,7 @@ def check_type(config):
         "word_size",
         "entity_size",
         "doc_size",
+        "history_size",
         "FEATURE_COUNT",
         "FIELD_COUNT",
         "dim",
@@ -61,6 +67,23 @@ def check_type(config):
         "n_item",
         "n_user_attr",
         "n_item_attr",
+        "item_embedding_dim",
+        "cate_embedding_dim",
+        "user_embedding_dim",
+        "max_seq_length",
+        "hidden_size",
+        "T",
+        "L",
+        "n_v",
+        "n_h",
+        "kernel_size",
+        "min_seq_length",
+        "attention_size",
+        "epochs",
+        "batch_size",
+        "show_step",
+        "save_epoch",
+        "train_num_ngs",
     ]
     for param in int_parameters:
         if param in config and not isinstance(config[param], int):
@@ -91,12 +114,21 @@ def check_type(config):
         "optimizer",
         "init_method",
         "attention_activation",
+        "user_vocab",
+        "item_vocab",
+        "cate_vocab",
     ]
     for param in str_parameters:
         if param in config and not isinstance(config[param], str):
             raise TypeError("Parameters {0} must be str".format(param))
 
-    list_parameters = ["layer_sizes", "activation", "dropout"]
+    list_parameters = [
+        "layer_sizes",
+        "activation",
+        "dropout",
+        "att_fcn_layer_sizes",
+        "dilations",
+    ]
     for param in list_parameters:
         if param in config and not isinstance(config[param], list):
             raise TypeError("Parameters {0} must be list".format(param))
@@ -118,10 +150,16 @@ def check_nn_config(f_config):
     elif f_config["model_type"] in ["dkn", "DKN"]:
         required_parameters = [
             "doc_size",
+            "history_size",
             "wordEmb_file",
             "entityEmb_file",
+            "contextEmb_file",
+            "news_feature_file",
+            "user_history_file",
             "word_size",
             "entity_size",
+            "use_entity",
+            "use_context",
             "data_format",
             "dim",
             "layer_sizes",
@@ -149,18 +187,82 @@ def check_nn_config(f_config):
             "data_format",
             "dropout",
         ]
-    else:
+    if f_config["model_type"] in ["gru4rec", "GRU4REC", "GRU4Rec"]:
         required_parameters = [
-            "FIELD_COUNT",
-            "FEATURE_COUNT",
-            "method",
-            "dim",
-            "layer_sizes",
-            "activation",
+            "item_embedding_dim",
+            "cate_embedding_dim",
+            "max_seq_length",
             "loss",
-            "data_format",
-            "dropout",
+            "method",
+            "user_vocab",
+            "item_vocab",
+            "cate_vocab",
+            "hidden_size",
         ]
+    elif f_config["model_type"] in ["caser", "CASER", "Caser"]:
+        required_parameters = [
+            "item_embedding_dim",
+            "cate_embedding_dim",
+            "user_embedding_dim",
+            "max_seq_length",
+            "loss",
+            "method",
+            "user_vocab",
+            "item_vocab",
+            "cate_vocab",
+            "T",
+            "L",
+            "n_v",
+            "n_h",
+            "min_seq_length",
+        ]
+    elif f_config["model_type"] in ["asvd", "ASVD", "a2svd", "A2SVD"]:
+        required_parameters = [
+            "item_embedding_dim",
+            "cate_embedding_dim",
+            "max_seq_length",
+            "loss",
+            "method",
+            "user_vocab",
+            "item_vocab",
+            "cate_vocab",
+        ]
+    elif f_config["model_type"] in ["slirec", "sli_rec", "SLI_REC", "Sli_rec"]:
+        required_parameters = [
+            "item_embedding_dim",
+            "cate_embedding_dim",
+            "max_seq_length",
+            "loss",
+            "method",
+            "user_vocab",
+            "item_vocab",
+            "cate_vocab",
+            "attention_size",
+            "hidden_size",
+            "att_fcn_layer_sizes",
+        ]
+    elif f_config["model_type"] in [
+        "nextitnet",
+        "next_it_net",
+        "NextItNet",
+        "NEXT_IT_NET",
+    ]:
+        required_parameters = [
+            "item_embedding_dim",
+            "cate_embedding_dim",
+            "user_embedding_dim",
+            "max_seq_length",
+            "loss",
+            "method",
+            "user_vocab",
+            "item_vocab",
+            "cate_vocab",
+            "dilations",
+            "kernel_size",
+            "min_seq_length",
+        ]
+    else:
+        required_parameters = []
 
     # check required parameters
     for param in required_parameters:
@@ -181,13 +283,6 @@ def check_nn_config(f_config):
                     f_config["data_format"]
                 )
             )
-    else:
-        if f_config["data_format"] not in ["fm"]:
-            raise ValueError(
-                "The default data format should be fm, but your set is {0}".format(
-                    f_config["data_format"]
-                )
-            )
     check_type(f_config)
 
 
@@ -204,9 +299,9 @@ def load_yaml(filename):
         with open(filename, "r") as f:
             config = yaml.load(f, yaml.SafeLoader)
         return config
-    except FileNotFoundError: # for file not found
+    except FileNotFoundError:  # for file not found
         raise
-    except Exception as e: # for other exceptions
+    except Exception as e:  # for other exceptions
         raise IOError("load {0} error!".format(filename))
 
 
@@ -238,7 +333,19 @@ def create_hparams(flags):
         # dkn
         wordEmb_file=flags["wordEmb_file"] if "wordEmb_file" in flags else None,
         entityEmb_file=flags["entityEmb_file"] if "entityEmb_file" in flags else None,
+        contextEmb_file=flags["contextEmb_file"]
+        if "contextEmb_file" in flags
+        else None,
+        news_feature_file=flags["news_feature_file"]
+        if "news_feature_file" in flags
+        else None,
+        user_history_file=flags["user_history_file"]
+        if "user_history_file" in flags
+        else None,
+        use_entity=flags["use_entity"] if "use_entity" in flags else True,
+        use_context=flags["use_context"] if "use_context" in flags else True,
         doc_size=flags["doc_size"] if "doc_size" in flags else None,
+        history_size=flags["history_size"] if "history_size" in flags else None,
         word_size=flags["word_size"] if "word_size" in flags else None,
         entity_size=flags["entity_size"] if "entity_size" in flags else None,
         entity_dim=flags["entity_dim"] if "entity_dim" in flags else None,
@@ -317,6 +424,51 @@ def create_hparams(flags):
         save_epoch=flags["save_epoch"] if "save_epoch" in flags else 5,
         metrics=flags["metrics"] if "metrics" in flags else None,
         write_tfevents=flags["write_tfevents"] if "write_tfevents" in flags else False,
+        # sequential
+        item_embedding_dim=flags["item_embedding_dim"]
+        if "item_embedding_dim" in flags
+        else None,
+        cate_embedding_dim=flags["cate_embedding_dim"]
+        if "cate_embedding_dim" in flags
+        else None,
+        user_embedding_dim=flags["user_embedding_dim"]
+        if "user_embedding_dim" in flags
+        else None,
+        train_num_ngs=flags["train_num_ngs"] if "train_num_ngs" in flags else 4,
+        need_sample=flags["need_sample"] if "need_sample" in flags else True,
+        embedding_dropout=flags["embedding_dropout"]
+        if "embedding_dropout" in flags
+        else 0.0,
+        user_vocab=flags["user_vocab"] if "user_vocab" in flags else None,
+        item_vocab=flags["item_vocab"] if "item_vocab" in flags else None,
+        cate_vocab=flags["cate_vocab"] if "cate_vocab" in flags else None,
+        pairwise_metrics=flags["pairwise_metrics"]
+        if "pairwise_metrics" in flags
+        else None,
+        EARLY_STOP=flags["EARLY_STOP"] if "EARLY_STOP" in flags else 100,
+        # gru4rec
+        max_seq_length=flags["max_seq_length"] if "max_seq_length" in flags else None,
+        hidden_size=flags["hidden_size"] if "hidden_size" in flags else None,
+        # caser,
+        L=flags["L"] if "L" in flags else None,
+        T=flags["T"] if "T" in flags else None,
+        n_v=flags["n_v"] if "n_v" in flags else None,
+        n_h=flags["n_h"] if "n_h" in flags else None,
+        min_seq_length=flags["min_seq_length"] if "min_seq_length" in flags else 1,
+        # sli_rec
+        attention_size=flags["attention_size"] if "attention_size" in flags else None,
+        att_fcn_layer_sizes=flags["att_fcn_layer_sizes"]
+        if "att_fcn_layer_sizes" in flags
+        else None,
+        # nextitnet
+        dilations=flags["dilations"] if "dilations" in flags else None,
+        kernel_size=flags["kernel_size"] if "kernel_size" in flags else None,
+        # lightgcn
+        embed_size=flags["embed_size"] if "embed_size" in flags else None,
+        n_layers=flags["n_layers"] if "n_layers" in flags else None,
+        decay=flags["decay"] if "decay" in flags else None,
+        eval_epoch=flags["eval_epoch"] if "eval_epoch" in flags else None,
+        top_k=flags["top_k"] if "top_k" in flags else None,
     )
 
 
@@ -360,9 +512,78 @@ def download_deeprec_resources(azure_container_url, data_path, remote_resource_n
     os.remove(os.path.join(data_path, remote_resource_name))
 
 
+def mrr_score(y_true, y_score):
+    """Computing mrr score metric.
+
+    Args:
+        y_true (np.ndarray): ground-truth labels.
+        y_score (np.ndarray): predicted labels.
+    
+    Returns:
+        np.ndarray: mrr scores.
+    """
+    order = np.argsort(y_score)[::-1]
+    y_true = np.take(y_true, order)
+    rr_score = y_true / (np.arange(len(y_true)) + 1)
+    return np.sum(rr_score) / np.sum(y_true)
+
+
+def ndcg_score(y_true, y_score, k=10):
+    """Computing ndcg score metric at k.
+
+    Args:
+        y_true (np.ndarray): ground-truth labels.
+        y_score (np.ndarray): predicted labels.
+
+    Returns:
+        np.ndarray: ndcg scores.
+    """
+    best = dcg_score(y_true, y_true, k)
+    actual = dcg_score(y_true, y_score, k)
+    return actual / best
+
+
+def hit_score(y_true, y_score, k=10):
+    """Computing hit score metric at k.
+
+    Args:
+        y_true (np.ndarray): ground-truth labels.
+        y_score (np.ndarray): predicted labels.
+
+    Returns:
+        np.ndarray: hit score.
+    """
+    ground_truth = np.where(y_true == 1)[0]
+    argsort = np.argsort(y_score)[::-1][:k]
+    for idx in argsort:
+        if idx in ground_truth:
+            return 1
+    return 0
+
+
+def dcg_score(y_true, y_score, k=10):
+    """Computing dcg score metric at k.
+
+    Args:
+        y_true (np.ndarray): ground-truth labels.
+        y_score (np.ndarray): predicted labels.
+
+    Returns:
+        np.ndarray: dcg scores.
+    """
+    k = min(np.shape(y_true)[-1], k)
+    order = np.argsort(y_score)[::-1]
+    y_true = np.take(y_true, order[:k])
+    gains = 2 ** y_true - 1
+    discounts = np.log2(np.arange(len(y_true)) + 2)
+    return np.sum(gains / discounts)
+
+
 def cal_metric(labels, preds, metrics):
-    """Calculate metrics,such as auc, logloss
-    FIXME: refactor this with the reco metrics
+    """Calculate metrics,such as auc, logloss.
+    
+    FIXME: 
+        refactor this with the reco metrics and make it explicit.
     """
     res = {}
     for metric in metrics:
@@ -389,6 +610,62 @@ def cal_metric(labels, preds, metrics):
             pred[pred < 0.5] = 0
             f1 = f1_score(np.asarray(labels), pred)
             res["f1"] = round(f1, 4)
+        elif metric == "mean_mrr":
+            mean_mrr = np.mean(
+                [
+                    mrr_score(each_labels, each_preds)
+                    for each_labels, each_preds in zip(labels, preds)
+                ]
+            )
+            res["mean_mrr"] = round(mean_mrr, 4)
+        elif metric.startswith("ndcg"):  # format like:  ndcg@2;4;6;8
+            ndcg_list = [1, 2]
+            ks = metric.split("@")
+            if len(ks) > 1:
+                ndcg_list = [int(token) for token in ks[1].split(";")]
+            for k in ndcg_list:
+                ndcg_temp = np.mean(
+                    [
+                        ndcg_score(each_labels, each_preds, k)
+                        for each_labels, each_preds in zip(labels, preds)
+                    ]
+                )
+                res["ndcg@{0}".format(k)] = round(ndcg_temp, 4)
+        elif metric.startswith("hit"):  # format like:  hit@2;4;6;8
+            hit_list = [1, 2]
+            ks = metric.split("@")
+            if len(ks) > 1:
+                hit_list = [int(token) for token in ks[1].split(";")]
+            for k in hit_list:
+                hit_temp = np.mean(
+                    [
+                        hit_score(each_labels, each_preds, k)
+                        for each_labels, each_preds in zip(labels, preds)
+                    ]
+                )
+                res["hit@{0}".format(k)] = round(hit_temp, 4)
+        elif metric == "group_auc":
+            group_auc = np.mean(
+                [
+                    roc_auc_score(each_labels, each_preds)
+                    for each_labels, each_preds in zip(labels, preds)
+                ]
+            )
+            res["group_auc"] = round(group_auc, 4)
         else:
             raise ValueError("not define this metric {0}".format(metric))
     return res
+
+
+def load_dict(filename):
+    """Load the vocabularies.
+
+    Args:
+        filename (str): Filename of user, item or category vocabulary.
+
+    Returns:
+        dict: A saved vocabulary.
+    """
+    with open(filename, "rb") as f:
+        f_pkl = pkl.load(f)
+        return f_pkl

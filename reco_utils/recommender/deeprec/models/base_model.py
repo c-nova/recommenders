@@ -1,19 +1,22 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+from os.path import join
 import abc
 import time
+import os
 import numpy as np
 import tensorflow as tf
-from ..deeprec_utils import cal_metric
+from tensorflow import keras
+from reco_utils.recommender.deeprec.deeprec_utils import cal_metric
 
 
 __all__ = ["BaseModel"]
 
 
-class BaseModel(object):
+class BaseModel:
     def __init__(self, hparams, iterator_creator, graph=None, seed=None):
-        """Initializing the model. Create common logics which are needed by all deeprec models, such as loss function, 
+        """Initializing the model. Create common logics which are needed by all deeprec models, such as loss function,
         parameter set.
 
         Args:
@@ -23,11 +26,14 @@ class BaseModel(object):
             seed (int): Random seed.
         """
         self.seed = seed
-        tf.set_random_seed(seed)
+        tf.compat.v1.set_random_seed(seed)
         np.random.seed(seed)
 
         self.graph = graph if graph is not None else tf.Graph()
         self.iterator = iterator_creator(hparams, self.graph)
+        self.train_num_ngs = (
+            hparams.train_num_ngs if "train_num_ngs" in hparams else None
+        )
 
         with self.graph.as_default():
             self.hparams = hparams
@@ -35,10 +41,13 @@ class BaseModel(object):
             self.layer_params = []
             self.embed_params = []
             self.cross_params = []
-            self.layer_keeps = tf.placeholder(tf.float32, name="layer_keeps")
+            self.layer_keeps = tf.compat.v1.placeholder(tf.float32, name="layer_keeps")
             self.keep_prob_train = None
             self.keep_prob_test = None
-            self.is_train_stage = tf.placeholder(tf.bool, shape=(), name="is_training")
+            self.is_train_stage = tf.compat.v1.placeholder(
+                tf.bool, shape=(), name="is_training"
+            )
+            self.group = tf.compat.v1.placeholder(tf.int32, shape=(), name="group")
 
             self.initializer = self._get_initializer()
 
@@ -46,15 +55,18 @@ class BaseModel(object):
             self.pred = self._get_pred(self.logit, self.hparams.method)
 
             self.loss = self._get_loss()
-            self.saver = tf.train.Saver(max_to_keep=self.hparams.epochs)
+            self.saver = tf.compat.v1.train.Saver(max_to_keep=self.hparams.epochs)
             self.update = self._build_train_opt()
-            self.init_op = tf.global_variables_initializer()
+            self.extra_update_ops = tf.compat.v1.get_collection(
+                tf.compat.v1.GraphKeys.UPDATE_OPS
+            )
+            self.init_op = tf.compat.v1.global_variables_initializer()
             self.merged = self._add_summaries()
 
-        # set GPU use with demand growth
-        gpu_options = tf.GPUOptions(allow_growth=True)
-        self.sess = tf.Session(
-            graph=self.graph, config=tf.ConfigProto(gpu_options=gpu_options)
+        # set GPU use with on demand growth
+        gpu_options = tf.compat.v1.GPUOptions(allow_growth=True)
+        self.sess = tf.compat.v1.Session(
+            graph=self.graph, config=tf.compat.v1.ConfigProto(gpu_options=gpu_options)
         )
         self.sess.run(self.init_op)
 
@@ -65,7 +77,7 @@ class BaseModel(object):
 
     def _get_loss(self):
         """Make loss function, consists of data loss and regularization loss
-        
+
         Returns:
             obj: Loss value
         """
@@ -76,11 +88,11 @@ class BaseModel(object):
 
     def _get_pred(self, logit, task):
         """Make final output as prediction score, according to different tasks.
-        
+
         Args:
             logit (obj): Base prediction value.
             task (str): A task (values: regression/classification)
-        
+
         Returns:
             obj: Transformed score
         """
@@ -94,13 +106,14 @@ class BaseModel(object):
                     task
                 )
             )
+        pred = tf.identity(pred, name='pred')
         return pred
 
     def _add_summaries(self):
-        tf.summary.scalar("data_loss", self.data_loss)
-        tf.summary.scalar("regular_loss", self.regular_loss)
-        tf.summary.scalar("loss", self.loss)
-        merged = tf.summary.merge_all()
+        tf.compat.v1.summary.scalar("data_loss", self.data_loss)
+        tf.compat.v1.summary.scalar("regular_loss", self.regular_loss)
+        tf.compat.v1.summary.scalar("loss", self.loss)
+        merged = tf.compat.v1.summary.merge_all()
         return merged
 
     def _l2_loss(self):
@@ -148,13 +161,17 @@ class BaseModel(object):
 
     def _get_initializer(self):
         if self.hparams.init_method == "tnormal":
-            return tf.truncated_normal_initializer(stddev=self.hparams.init_value, seed=self.seed)
+            return tf.truncated_normal_initializer(
+                stddev=self.hparams.init_value, seed=self.seed
+            )
         elif self.hparams.init_method == "uniform":
             return tf.random_uniform_initializer(
                 -self.hparams.init_value, self.hparams.init_value, seed=self.seed
             )
         elif self.hparams.init_method == "normal":
-            return tf.random_normal_initializer(stddev=self.hparams.init_value, seed=self.seed)
+            return tf.random_normal_initializer(
+                stddev=self.hparams.init_value, seed=self.seed
+            )
         elif self.hparams.init_method == "xavier_normal":
             return tf.contrib.layers.xavier_initializer(uniform=False, seed=self.seed)
         elif self.hparams.init_method == "xavier_uniform":
@@ -168,7 +185,9 @@ class BaseModel(object):
                 factor=2.0, mode="FAN_IN", uniform=True, seed=self.seed
             )
         else:
-            return tf.truncated_normal_initializer(stddev=self.hparams.init_value, seed=self.seed)
+            return tf.truncated_normal_initializer(
+                stddev=self.hparams.init_value, seed=self.seed
+            )
 
     def _compute_data_loss(self):
         if self.hparams.loss == "cross_entropy_loss":
@@ -189,11 +208,32 @@ class BaseModel(object):
             )
         elif self.hparams.loss == "log_loss":
             data_loss = tf.reduce_mean(
-                tf.losses.log_loss(
+                tf.compat.v1.losses.log_loss(
                     predictions=tf.reshape(self.pred, [-1]),
                     labels=tf.reshape(self.iterator.labels, [-1]),
                 )
             )
+        elif self.hparams.loss == "softmax":
+            group = self.train_num_ngs + 1
+            logits = tf.reshape(self.logit, (-1, group))
+            if self.hparams.model_type == "NextItNet":
+                labels = (
+                    tf.transpose(
+                        tf.reshape(
+                            self.iterator.labels,
+                            (-1, group, self.hparams.max_seq_length),
+                        ),
+                        [0, 2, 1],
+                    ),
+                )
+                labels = tf.reshape(labels, (-1, group))
+            else:
+                labels = tf.reshape(self.iterator.labels, (-1, group))
+            softmax_pred = tf.nn.softmax(logits, axis=-1)
+            boolean_mask = tf.equal(labels, tf.ones_like(labels))
+            mask_paddings = tf.ones_like(softmax_pred)
+            pos_softmax = tf.where(boolean_mask, softmax_pred, mask_paddings)
+            data_loss = -group * tf.reduce_mean(tf.math.log(pos_softmax))
         else:
             raise ValueError("this loss not defined {0}".format(self.hparams.loss))
         return data_loss
@@ -222,17 +262,19 @@ class BaseModel(object):
         elif optimizer == "sgd":
             train_step = tf.train.GradientDescentOptimizer(lr)
         elif optimizer == "adam":
-            train_step = tf.train.AdamOptimizer(lr)
+            train_step = tf.compat.v1.train.AdamOptimizer(lr)
         elif optimizer == "ftrl":
             train_step = tf.train.FtrlOptimizer(lr)
         elif optimizer == "gd":
             train_step = tf.train.GradientDescentOptimizer(lr)
         elif optimizer == "padagrad":
-            train_step = tf.train.ProximalAdagradOptimizer(lr)  # .minimize(self.loss)
+            train_step = tf.train.ProximalAdagradOptimizer(lr)
         elif optimizer == "pgd":
             train_step = tf.train.ProximalGradientDescentOptimizer(lr)
         elif optimizer == "rmsprop":
             train_step = tf.train.RMSPropOptimizer(lr)
+        elif optimizer == "lazyadam":
+            train_step = tf.contrib.opt.LazyAdamOptimizer(lr)
         else:
             train_step = tf.train.GradientDescentOptimizer(lr)
         return train_step
@@ -257,12 +299,12 @@ class BaseModel(object):
 
     def _active_layer(self, logit, activation, layer_idx=-1):
         """Transform the input value with an activation. May use dropout.
-        
+
         Args:
             logit (obj): Input value.
             activation (str): A string indicating the type of activation function.
             layer_idx (int): Index of current layer. Used to retrieve corresponding parameters
-        
+
         Returns:
             obj: A tensor after applying activation function on logit.
         """
@@ -310,7 +352,14 @@ class BaseModel(object):
         feed_dict[self.layer_keeps] = self.keep_prob_train
         feed_dict[self.is_train_stage] = True
         return sess.run(
-            [self.update, self.loss, self.data_loss, self.merged], feed_dict=feed_dict
+            [
+                self.update,
+                self.extra_update_ops,
+                self.loss,
+                self.data_loss,
+                self.merged,
+            ],
+            feed_dict=feed_dict,
         )
 
     def eval(self, sess, feed_dict):
@@ -326,10 +375,7 @@ class BaseModel(object):
         """
         feed_dict[self.layer_keeps] = self.keep_prob_test
         feed_dict[self.is_train_stage] = False
-        return sess.run(
-            [self.loss, self.data_loss, self.pred, self.iterator.labels],
-            feed_dict=feed_dict,
-        )
+        return sess.run([self.pred, self.iterator.labels], feed_dict=feed_dict)
 
     def infer(self, sess, feed_dict):
         """Given feature data (in feed_dict), get predicted scores with current model.
@@ -365,7 +411,7 @@ class BaseModel(object):
     def fit(self, train_file, valid_file, test_file=None):
         """Fit the model with train_file. Evaluate the model on valid_file per epoch to observe the training status.
         If test_file is not None, evaluate it too.
-        
+
         Args:
             train_file (str): training data set.
             valid_file (str): validation set.
@@ -386,9 +432,13 @@ class BaseModel(object):
 
             epoch_loss = 0
             train_start = time.time()
-            for batch_data_input in self.iterator.load_data_from_file(train_file):
+            for (
+                batch_data_input,
+                impression,
+                data_size,
+            ) in self.iterator.load_data_from_file(train_file):
                 step_result = self.train(train_sess, batch_data_input)
-                (_, step_loss, step_data_loss, summary) = step_result
+                (_, _, step_loss, step_data_loss, summary) = step_result
                 if self.hparams.write_tfevents:
                     self.writer.add_summary(summary, step)
                 epoch_loss += step_loss
@@ -404,19 +454,20 @@ class BaseModel(object):
             train_time = train_end - train_start
 
             if self.hparams.save_model:
+                if not os.path.exists(self.hparams.MODEL_DIR):
+                    os.makedirs(self.hparams.MODEL_DIR)
                 if epoch % self.hparams.save_epoch == 0:
+                    save_path_str = join(self.hparams.MODEL_DIR, "epoch_" + str(epoch))
                     checkpoint_path = self.saver.save(
-                        sess=train_sess,
-                        save_path=self.hparams.MODEL_DIR + "epoch_" + str(epoch),
+                        sess=train_sess, save_path=save_path_str
                     )
 
             eval_start = time.time()
-            train_res = self.run_eval(train_file)
             eval_res = self.run_eval(valid_file)
-            train_info = ", ".join(
+            train_info = ",".join(
                 [
                     str(item[0]) + ":" + str(item[1])
-                    for item in sorted(train_res.items(), key=lambda x: x[0])
+                    for item in [("logloss loss", epoch_loss / step)]
                 ]
             )
             eval_info = ", ".join(
@@ -439,19 +490,19 @@ class BaseModel(object):
             if test_file is not None:
                 print(
                     "at epoch {0:d}".format(epoch)
-                    + " train info: "
+                    + "\ntrain info: "
                     + train_info
-                    + " eval info: "
+                    + "\neval info: "
                     + eval_info
-                    + " test info: "
+                    + "\ntest info: "
                     + test_info
                 )
             else:
                 print(
                     "at epoch {0:d}".format(epoch)
-                    + " train info: "
+                    + "\ntrain info: "
                     + train_info
-                    + " eval info: "
+                    + "\neval info: "
                     + eval_info
                 )
             print(
@@ -465,9 +516,32 @@ class BaseModel(object):
 
         return self
 
+    def group_labels(self, labels, preds, group_keys):
+        """Devide labels and preds into several group according to values in group keys.
+        Args:
+            labels (list): ground truth label list.
+            preds (list): prediction score list.
+            group_keys (list): group key list.
+        Returns:
+            all_labels: labels after group.
+            all_preds: preds after group.
+        """
+        all_keys = list(set(group_keys))
+        group_labels = {k: [] for k in all_keys}
+        group_preds = {k: [] for k in all_keys}
+        for l, p, k in zip(labels, preds, group_keys):
+            group_labels[k].append(l)
+            group_preds[k].append(p)
+        all_labels = []
+        all_preds = []
+        for k in all_keys:
+            all_labels.append(group_labels[k])
+            all_preds.append(group_preds[k])
+        return all_labels, all_preds
+
     def run_eval(self, filename):
         """Evaluate the given file and returns some evaluation metrics.
-        
+
         Args:
             filename (str): A file name that will be evaluated.
 
@@ -477,27 +551,157 @@ class BaseModel(object):
         load_sess = self.sess
         preds = []
         labels = []
-        for batch_data_input in self.iterator.load_data_from_file(filename):
-            _, _, step_pred, step_labels = self.eval(load_sess, batch_data_input)
+        imp_indexs = []
+        for batch_data_input, imp_index, data_size in self.iterator.load_data_from_file(
+            filename
+        ):
+            step_pred, step_labels = self.eval(load_sess, batch_data_input)
             preds.extend(np.reshape(step_pred, -1))
             labels.extend(np.reshape(step_labels, -1))
+            imp_indexs.extend(np.reshape(imp_index, -1))
         res = cal_metric(labels, preds, self.hparams.metrics)
+        if self.hparams.pairwise_metrics is not None:
+            group_labels, group_preds = self.group_labels(labels, preds, imp_indexs)
+            res_pairwise = cal_metric(
+                group_labels, group_preds, self.hparams.pairwise_metrics
+            )
+            res.update(res_pairwise)
         return res
 
     def predict(self, infile_name, outfile_name):
         """Make predictions on the given data, and output predicted scores to a file.
-        
+
         Args:
-            infile_name (str): Input file name.
-            outfile_name (str): Output file name.
+            infile_name (str): Input file name, format is same as train/val/test file.
+            outfile_name (str): Output file name, each line is the predict score.
 
         Returns:
             obj: An instance of self.
         """
         load_sess = self.sess
         with tf.gfile.GFile(outfile_name, "w") as wt:
-            for batch_data_input in self.iterator.load_data_from_file(infile_name):
+            for batch_data_input, _, data_size in self.iterator.load_data_from_file(
+                infile_name
+            ):
                 step_pred = self.infer(load_sess, batch_data_input)
+                step_pred = step_pred[0][:data_size]
                 step_pred = np.reshape(step_pred, -1)
                 wt.write("\n".join(map(str, step_pred)))
+                # line break after each batch.
+                wt.write("\n")
         return self
+
+    def _attention(self, inputs, attention_size):
+        """Soft alignment attention implement.
+
+        Args:
+            inputs (obj): Sequences ready to apply attention.
+            attention_size (int): The dimension of attention operation.
+
+        Returns:
+            obj: Weighted sum after attention.
+        """
+        hidden_size = inputs.shape[2].value
+        if not attention_size:
+            attention_size = hidden_size
+
+        attention_mat = tf.get_variable(
+            name="attention_mat",
+            shape=[inputs.shape[-1].value, hidden_size],
+            initializer=self.initializer,
+        )
+        att_inputs = tf.tensordot(inputs, attention_mat, [[2], [0]])
+
+        query = tf.get_variable(
+            name="query",
+            shape=[attention_size],
+            dtype=tf.float32,
+            initializer=self.initializer,
+        )
+        att_logits = tf.tensordot(att_inputs, query, axes=1, name="att_logits")
+        att_weights = tf.nn.softmax(att_logits, name="att_weights")
+        output = inputs * tf.expand_dims(att_weights, -1)
+        return output
+
+    def _fcn_net(self, model_output, layer_sizes, scope):
+        """Construct the MLP part for the model.
+
+        Args:
+            model_output (obj): The output of upper layers, input of MLP part
+            layer_sizes (list): The shape of each layer of MLP part
+            scope (obj): The scope of MLP part
+
+        Returns:s
+            obj: prediction logit after fully connected layer
+        """
+        hparams = self.hparams
+        with tf.variable_scope(scope):
+            last_layer_size = model_output.shape[-1]
+            layer_idx = 0
+            hidden_nn_layers = []
+            hidden_nn_layers.append(model_output)
+            with tf.variable_scope("nn_part", initializer=self.initializer) as scope:
+                for idx, layer_size in enumerate(layer_sizes):
+                    curr_w_nn_layer = tf.get_variable(
+                        name="w_nn_layer" + str(layer_idx),
+                        shape=[last_layer_size, layer_size],
+                        dtype=tf.float32,
+                    )
+                    curr_b_nn_layer = tf.get_variable(
+                        name="b_nn_layer" + str(layer_idx),
+                        shape=[layer_size],
+                        dtype=tf.float32,
+                        initializer=tf.zeros_initializer(),
+                    )
+                    tf.summary.histogram(
+                        "nn_part/" + "w_nn_layer" + str(layer_idx), curr_w_nn_layer
+                    )
+                    tf.summary.histogram(
+                        "nn_part/" + "b_nn_layer" + str(layer_idx), curr_b_nn_layer
+                    )
+                    curr_hidden_nn_layer = (
+                        tf.tensordot(
+                            hidden_nn_layers[layer_idx], curr_w_nn_layer, axes=1
+                        )
+                        + curr_b_nn_layer
+                    )
+
+                    scope = "nn_part" + str(idx)
+                    activation = hparams.activation[idx]
+
+                    if hparams.enable_BN is True:
+                        curr_hidden_nn_layer = tf.layers.batch_normalization(
+                            curr_hidden_nn_layer,
+                            momentum=0.95,
+                            epsilon=0.0001,
+                            training=self.is_train_stage,
+                        )
+
+                    curr_hidden_nn_layer = self._active_layer(
+                        logit=curr_hidden_nn_layer, activation=activation, layer_idx=idx
+                    )
+                    hidden_nn_layers.append(curr_hidden_nn_layer)
+                    layer_idx += 1
+                    last_layer_size = layer_size
+
+                w_nn_output = tf.get_variable(
+                    name="w_nn_output", shape=[last_layer_size, 1], dtype=tf.float32
+                )
+                b_nn_output = tf.get_variable(
+                    name="b_nn_output",
+                    shape=[1],
+                    dtype=tf.float32,
+                    initializer=tf.zeros_initializer(),
+                )
+                tf.summary.histogram(
+                    "nn_part/" + "w_nn_output" + str(layer_idx), w_nn_output
+                )
+                tf.summary.histogram(
+                    "nn_part/" + "b_nn_output" + str(layer_idx), b_nn_output
+                )
+                nn_output = (
+                    tf.tensordot(hidden_nn_layers[-1], w_nn_output, axes=1)
+                    + b_nn_output
+                )
+                self.logit = nn_output
+        return nn_output
