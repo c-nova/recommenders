@@ -1,9 +1,9 @@
-# Operationalize
+# 運用化
 
-In this directory, a notebook is provided to demonstrate how recommendation systems developed in a heterogeneous environment (e.g., Spark, GPU, etc.) can be operationalized.
+このディレクトリには、異機種環境(Spark、GPUなど)で開発されたレコメンデーション システムがどのように運用化できるかを示すノートブックを用意しております。
 
-| Notebook | Description | 
+| Notebook | 説明 | 
 | --- | --- | 
-| [als_movie_o16n](als_movie_o16n.ipynb) | End-to-end examples demonstrate how to build, evaluate, and deploy a Spark ALS based movie recommender with Azure services such as [Databricks](https://azure.microsoft.com/en-us/services/databricks/), [Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction), and [Kubernetes Services](https://azure.microsoft.com/en-us/services/kubernetes-service/).
-| [aks_locust_load_test](aks_locust_load_test.ipynb) | Load test example for a recommendation system deployed on an AKS cluster | 
-| [lightgbm_criteo_o16n](lightgbm_criteo_o16n.ipynb) | Content-based personalization deployment of an ad click prediction scenario |
+| [als_movie_o16n](als_movie_o16n.ipynb) | このエンド ツー エンドの例では、[Databricks](https://azure.microsoft.com/en-us/services/databricks/)、[Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction)、[Kubernetes Services](https://azure.microsoft.com/en-us/services/kubernetes-service/)などの Azure サービスを使用して Spark ALS ベースの映画のレコメンデーションを構築、評価、デプロイする方法を示します。|
+| [aks_locust_load_test](aks_locust_load_test.ipynb) | AKS クラスターに展開されたレコメンデーション システムの負荷テストの例 | 
+| [lightgbm_criteo_o16n](lightgbm_criteo_o16n.ipynb) | 広告クリック予測シナリオにおける、コンテンツベースのパーソナライズ化システムの展開 |

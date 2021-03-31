@@ -74,12 +74,12 @@ jupyter notebook
 | Cornac/Bayesian Personalized Ranking (BPR) | [Python CPU](examples/02_model_collaborative_filtering/cornac_bpr_deep_dive.ipynb) | 協調フィルタリング | 暗黙のフィードバックを伴う項目の順位を予測するための行列因子化アルゴリズム |
 | Convolutional Sequence Embedding Recommendation (Caser) | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | ユーザーの一般的な好みと順序パターンの両方をキャプチャすることを目的とした畳み込みベースのアルゴリズム |
 | Deep Knowledge-Aware Network (DKN)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/dkn_MIND.ipynb) | コンテンツベース フィルタリング | ナレッジグラフと記事の埋め込みを組み込んだディープラーニングアルゴリズムにより、強力なニュースや記事のレコメンデーションを提供 | 
-| Extreme Deep Factorization Machine (xDeepFM)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/xdeepfm_criteo.ipynb) | ハイブリッド | ユーザー/アイテムのフィーチャーを使用した暗黙的及び明示的なフィードバックのためのディープラーニングベースのアルゴリズム | 
+| Extreme Deep Factorization Machine (xDeepFM)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/xdeepfm_criteo.ipynb) | ハイブリッド | ユーザー/アイテムの特徴量を使用した暗黙的及び明示的なフィードバックのためのディープラーニングベースのアルゴリズム | 
 | FastAI Embedding Dot Bias (FAST) | [Python CPU / Python GPU](examples/00_quick_start/fastai_movielens.ipynb) | 協調フィルタリング | ユーザーとアイテムの埋め込みとバイアスを含む汎用アルゴリズム |
 | LightFM/Hybrid Matrix Factorization | [Python CPU](examples/02_model_hybrid/lightfm_deep_dive.ipynb) | ハイブリッド | 暗黙的および明示的フィードバックのハイブリッド行列分解アルゴリズム |
 | LightGBM/Gradient Boosting Tree<sup>*</sup> | [Python CPU](examples/00_quick_start/lightgbm_tinycriteo.ipynb) / [PySpark](examples/02_model_content_based_filtering/mmlspark_lightgbm_criteo.ipynb) | コンテンツベース フィルタリング | コンテンツベースの問題における高速トレーニングと低メモリ使用量の勾配ブースティング ツリー アルゴリズム |
 | LightGCN | [Python CPU / Python GPU](examples/02_model_collaborative_filtering/lightgcn_deep_dive.ipynb) | 協調フィルタリング | 暗黙のフィードバックを予測するためのGCNの設計を簡素化するディープラーニングアルゴリズム |
-| GeoIMC | [Python CPU](examples/00_quick_start/geoimc_movielens.ipynb) | ハイブリッド | リーマン共役勾配最適化と幾何学的アプローチに従って、ユーザーと項目の変数を考慮に入れた行列補完アルゴリズム |
+| GeoIMC | [Python CPU](examples/00_quick_start/geoimc_movielens.ipynb) | ハイブリッド | リーマン共役勾配最適化と幾何学的アプローチに従って、ユーザーと項目の特徴量を考慮に入れた行列補完アルゴリズム |
 | GRU4Rec | [Python CPU / Python GPU](examples/00_quick_start/sequential_recsys_amazondataset.ipynb) | 協調フィルタリング | 回帰型ニューラルネットワークを用いて長期ユーザー設定と短期ユーザ嗜好の両方をキャプチャすることを目的とした順序ベースのアルゴリズム |
 | Multinomial VAE | [Python CPU / Python GPU](examples/02_model_collaborative_filtering/multi_vae_deep_dive.ipynb) | 協調フィルタリング | ユーザー/項目の相互作用を予測するための生成モデル |
 | Neural Recommendation with Long- and Short-term User Representations (LSTUR)<sup>*</sup> | [Python CPU / Python GPU](examples/00_quick_start/lstur_MIND.ipynb) | コンテンツベース フィルタリング | 長期および短期ユーザーの交互モデリングを用いたニューラル レコメンデーション アルゴリズム |
@@ -95,10 +95,9 @@ jupyter notebook
 | Standard VAE | [Python CPU / Python GPU](examples/02_model_collaborative_filtering/standard_vae_deep_dive.ipynb) | 協調フィルタリング | ユーザー/項目の相互作用を予測するための生成モデル |
 | Surprise/Singular Value Decomposition (SVD) | [Python CPU](examples/02_model_collaborative_filtering/surprise_svd_deep_dive.ipynb) | 協調フィルタリング | それほど大きくないデータセット内の明示的な評価フィードバックを予測するための行列因子化アルゴリズム | 
 | Term Frequency - Inverse Document Frequency (TF-IDF) | [Python CPU](examples/00_quick_start/tfidf_covid.ipynb) | コンテンツベース フィルタリング | テキスト データセットを使用したコンテンツ ベースのレコメンデーション事項に対する単純な類似性ベースのアルゴリズム |
-| Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](examples/02_model_content_based_filtering/vowpal_wabbit_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザーのフィーチャー/コンテキストが絶えず変化するシナリオに最適な高速オンライン学習アルゴリズム |
-| Wide and Deep | [Python CPU / Python GPU](examples/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | フィーチャの相互作用を記憶し、ユーザーのフィーチャーを一般化できるディープラーニング アルゴリズム |
-| Wide and Deep | [Python CPU / Python GPU](examples/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | 変数の相互作用を記憶し、ユーザー変数を一般化できるディープラーニング アルゴリズム |
-| xLearn/Factorization Machine (FM) & Field-Aware FM (FFM) | [Python CPU](examples/02_model_hybrid/fm_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザー/項目変数を備えたラベルを予測する高速でメモリ効率の高いアルゴリズム |
+| Vowpal Wabbit Family (VW)<sup>*</sup> | [Python CPU (online training)](examples/02_model_content_based_filtering/vowpal_wabbit_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザーの特徴量/コンテキストが絶えず変化するシナリオに最適な高速オンライン学習アルゴリズム |
+| Wide and Deep | [Python CPU / Python GPU](examples/00_quick_start/wide_deep_movielens.ipynb) | ハイブリッド | 特徴量の相互作用を記憶し、ユーザー特徴量を一般化できるディープラーニング アルゴリズム |
+| xLearn/Factorization Machine (FM) & Field-Aware FM (FFM) | [Python CPU](examples/02_model_hybrid/fm_deep_dive.ipynb) | コンテンツベース フィルタリング | ユーザー/項目特徴量を備えたラベルを予測する高速でメモリ効率の高いアルゴリズム |
 
 
 **注**: <sup>*</sup> 印のアルゴリズムは Microsoft によって開発/寄贈されたアルゴリズム。

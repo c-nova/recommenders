@@ -1,30 +1,30 @@
-# Quick Start
+# クイック スタート
 
-In this directory, notebooks are provided to perform a quick demonstration of different algorithms such as Alternating Least Squares ([ALS](https://spark.apache.org/docs/latest/api/python/_modules/pyspark/ml/recommendation.html#ALS)) or Simple Algorithm for Recommendation ([SAR](https://github.com/Microsoft/Product-Recommendations/blob/master/doc/sar.md)). The notebooks show how to establish an end-to-end recommendation pipeline that consists of data preparation, model building, and model evaluation by using the utility functions ([reco_utils](../../reco_utils)).
+このディレクトリでは、交互最小二乗法 ([ALS](https://spark.apache.org/docs/latest/api/python/_modules/pyspark/ml/recommendation.html#ALS)) またはレコメンド用の簡易アルゴリズム ([SAR](https://github.com/Microsoft/Product-Recommendations/blob/master/doc/sar.md)) などの、さまざまなアルゴリズムの簡単なデモを実行するためにノートブックが用意されています。ノートブックでは、ユーティリティ関数 ([reco_utils](../../reco_utils)) を使用して、データ準備、モデル構築、およびモデル評価で構成されるエンドツーエンドのレコメンデーション パイプラインを確立する方法を示します。
 
-| Notebook | Dataset | Environment | Description |
+| Notebook | データセット | 環境 | 説明 |
 | --- | --- | --- | --- |
-| [als](als_movielens.ipynb) | MovieLens | PySpark | Utilizing ALS algorithm to predict movie ratings in a PySpark environment.
-| [dkn](dkn_MIND.ipynb) | MIND | Python CPU, GPU | Utilizing the Deep Knowledge-Aware Network (DKN) [2] algorithm for news recommendations using information from a knowledge graph, in a Python+GPU (TensorFlow) environment.
-| [fastai](fastai_movielens.ipynb) | MovieLens | Python CPU, GPU | Utilizing FastAI recommender to predict movie ratings in a Python+GPU (PyTorch) environment.
-| [lightgbm](lightgbm_tinycriteo.ipynb) | Criteo | Python CPU | Utilizing LightGBM Boosting Tree to predict whether or not a user has clicked on an e-commerce ad |
-| [lstur](lstur_MIND.ipynb) | MIND | Python CPU, GPU | Utilizing the Neural News Recommendation with Long- and Short-term User Representations (LSTUR) [9] for news recommendation, in a Python+GPU (Tensorflow) enviroment.
-| [naml](naml_MIND.ipynb) | MIND | Python CPU, GPU | Utilizing the Neural News Recommendation with Attentive Multi-View Learning (NAML) [7] to algorithm for news recommendation using news verticle, subverticle, title and body information, in a Python+GPU (Tensorflow) environment.  
-| [ncf](ncf_movielens.ipynb) | MovieLens | Python CPU, GPU |  Utilizing Neural Collaborative Filtering (NCF) [1] to predict movie ratings in a Python+GPU (TensorFlow) environment.
-| [npa](npa_MIND.ipynb) | MIND | Python CPU, GPU | Utilizing the Neural News Recommendation with Personalized Attention (NPA) [10] for news recommendation, in a Python+GPU (Tensorflow) environment.  
-| [nrms](nrms_MIND.ipynb) | MIND | Python CPU, GPU | Utilizing the Neural News Recommendation with Multi-Head Self-Attention (NRMS) [8] for news recommendation, in a Python+GPU (Tensorflow) environment.  
-| [rbm](rbm_movielens.ipynb)| MovieLens | Python CPU, GPU | Utilizing the Restricted Boltzmann Machine (rbm) [4] to predict movie ratings in a Python+GPU (TensorFlow) environment.
-| [rlrmc](rlrmc_movielens.ipynb) | Movielens | Python CPU | Utilizing the Riemannian Low-rank Matrix Completion (RLRMC) [6] to predict movie rating in a Python+CPU environment
-| [sar](sar_movielens.ipynb) | MovieLens | Python CPU | Utilizing Simple Algorithm for Recommendation (SAR) algorithm to predict movie ratings in a Python+CPU environment.
-| [sar_azureml](sar_movielens_with_azureml.ipynb) | MovieLens | Python CPU | An example of how to utilize and evaluate SAR using the [Azure Machine Learning service](https://docs.microsoft.com/azure/machine-learning/service/overview-what-is-azure-ml) (AzureML). It takes the content of the [sar quickstart notebook](sar_movielens.ipynb) and demonstrates how to use the power of the cloud to manage data, switch to powerful GPU machines, and monitor runs while training a model.
-| [sar_azureml_designer](sar_movieratings_with_azureml_designer.ipynb) | MovieLens | Python CPU | An example of how to implement SAR on [AzureML Designer](https://docs.microsoft.com/en-us/azure/machine-learning/concept-designer). |
-| [a2svd](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | Use A2SVD [11] to predict a set of movies the user is going to interact in a short time. |
-| [caser](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | Use Caser [12] to predict a set of movies the user is going to interact in a short time. |
-| [gru4rec](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | Use GRU4Rec [13] to predict a set of movies the user is going to interact in a short time. |
-| [nextitnet](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | Use NextItNet [14] to predict a set of movies the user is going to interact in a short time. |
-| [sli-rec](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | Use SLi-Rec [11] to predict a set of movies the user is going to interact in a short time. |
-| [wide-and-deep](wide_deep_movielens.ipynb) | MovieLens | Python CPU, GPU |  Utilizing Wide-and-Deep Model (Wide-and-Deep) [5] to predict movie ratings in a Python+GPU (TensorFlow) environment.
-| [xdeepfm](xdeepfm_criteo.ipynb) | Criteo | Python CPU, GPU |  Utilizing the eXtreme Deep Factorization Machine (xDeepFM) [3] to learn both low and high order feature interactions for predicting CTR, in a Python+GPU (TensorFlow) environment.
+| [als](als_movielens.ipynb) | MovieLens | PySpark | ALS アルゴリズムを使用して、PySpark 環境で映画の評価を予測します。
+| [dkn](dkn_MIND.ipynb) | MIND | Python CPU, GPU | Python GPU (TensorFlow) 環境で、ナレッジグラフからの情報を使用したニュースのレコメンドのためのディープ・ナレッジ認識ネットワーク (DKN) [2] アルゴリズムを利用します。
+| [fastai](fastai_movielens.ipynb) | MovieLens | Python CPU, GPU | FastAI レコメンデーションを利用して、Python+GPU (PyTorch) 環境で映画の評価を予測します。
+| [lightgbm](lightgbm_tinycriteo.ipynb) | Criteo | Python CPU | LightGBM ブースト ツリーを使用して、ユーザーがeコマースの広告をクリックしたかどうかを予測します
+| [lstur](lstur_MIND.ipynb) | MIND | Python CPU, GPU | Python+GPU (Tensorflow) 環境で、ニュースのレコメンデーションのための長期および短期ユーザー表現 (LSTUR) [9] とニューラルニュース レコメンデーション を利用します。
+| [naml](naml_MIND.ipynb) | MIND | Python CPU, GPU | Python+GPU (Tensorflow) 環境でニュースの主題、副題、タイトル、本文の情報を使用したニュース レコメンデーションのための Attentive multi-view learning（アテンションを利用したマルチビュー学習） (NAML) [7] とニューラルニュース レコメンデーションを利用します。
+| [ncf](ncf_movielens.ipynb) | MovieLens | Python CPU, GPU |  Python+GPU (TensorFlow) 環境での映画の評価を予測するニューラル協調フィルタリング (NCF) [1] を利用します。
+| [npa](npa_MIND.ipynb) | MIND | Python CPU, GPU | Python+GPU (Tensorflow) 環境でニュース レコメンデーションするために、パーソナライズされたアテンション (NPA)[10]でニューラルニュース レコメンデーションを利用します。
+| [nrms](nrms_MIND.ipynb) | MIND | Python CPU, GPU | Python+GPU (Tensorflow) 環境でニュース レコメンデーションするために、マルチヘッド自己アテンション (NRMS) [8] でニューラルニュース レコメンデーションを利用します。
+| [rbm](rbm_movielens.ipynb)| MovieLens | Python CPU, GPU | 制限付きボルツマンマシン(rbm)[4]を利用して、Python+GPU (TensorFlow) 環境で映画の評価を予測します。
+| [rlrmc](rlrmc_movielens.ipynb) | Movielens | Python CPU | リーマン低ランク行列補完(RLRMC)[6]を利用して、Python+CPU環境で映画の評価を予測します
+| [sar](sar_movielens.ipynb) | MovieLens | Python CPU | レコメンデーション 用簡易アルゴリズム (SAR) を使用して、Python+CPU 環境で映画の評価を予測します。
+| [sar_azureml](sar_movielens_with_azureml.ipynb) | MovieLens | Python CPU |[Azure Machine Learning service](https://docs.microsoft.com/azure/machine-learning/service/overview-what-is-azure-ml) (AzureML) を使用して SAR を利用して評価する方法の例です。[sar quickstart notebook](sar_movielens.ipynb)の内容を取り入れ、クラウドのパワーを使用してデータを管理し、強力なGPUマシンに切り替え、モデルをトレーニングしながら実行を監視する方法を示します。
+| [sar_azureml_designer](sar_movieratings_with_azureml_designer.ipynb) | MovieLens | Python CPU | [AzureML Designer](https://docs.microsoft.com/en-us/azure/machine-learning/concept-designer) で SAR を実装する方法の例を示します。
+| [a2svd](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | A2SVD [11] を使用して、ユーザーの短期間での操作から一連の映画を予測します。
+| [caser](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | Caser [12] を使用して、ユーザーの短期間での操作から一連の映画を予測します。
+| [gru4rec](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | GRU4Rec [13] を使用して、ユーザーの短期間での操作から一連の映画を予測します。
+| [nextitnet](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | NextItNet [14] を使用して、ユーザーの短期間での操作から一連の映画を予測します。
+| [sli-rec](sequential_recsys_amazondataset.ipynb) | Amazon | Python CPU, GPU | SLi-Rec [11] を使用して、ユーザーの短期間での操作から一連の映画を予測します。
+| [wide-and-deep](wide_deep_movielens.ipynb) | MovieLens | Python CPU, GPU | Wide-and-Deep モデル [5] を利用して Python+GPU (TensorFlow) 環境で映画の評価を予測します。
+| [xdeepfm](xdeepfm_criteo.ipynb) | Criteo | Python CPU, GPU |  eXtreme ディープ ファクタリゼーションマシン(xDeepFM)[3]を利用して、Python+GPU (TensorFlow) 環境でCTRを予測するための低次と高次の両方のフィーチャーの相互作用を学習します。
 
 [1] _Neural Collaborative Filtering_, Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu and Tat-Seng Chua. WWW 2017.<br>
 [2] _DKN: Deep Knowledge-Aware Network for News Recommendation_, Hongwei Wang, Fuzheng Zhang, Xing Xie and Minyi Guo. WWW 2018.<br>
